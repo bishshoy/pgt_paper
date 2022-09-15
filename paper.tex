@@ -543,6 +543,19 @@ modifying the gradients in the backward pass can improve performance in many cas
 rise in training accuracy indicates that PGT enables the network to learn more from the
 training data.
 
+Self-knowledge distillation is used in many papers in different ways, which mainly
+focuses on improving the performance of the model by either creating multiple ensemble
+student models \cite{zhang2018deep}, using different distorted versions of same data
+with two different versions of a single network which guides one another
+\cite{xu2019data} or injecting multiple sub-modules in the network to improve its
+capacity \cite{zhang2019your}. However none of these methods use normal traditional
+training without introducing sub-modules in the architecture. PGT differs from
+self-knowledge distillation as it neither introduces any additional sub-modules nor
+creates different ensembles to improve the performance of the model. PGT follows the
+standard neural network training mechanism with a single change which is altering the
+last layer's gradients in the backward pass.
+
+
 Other techniques of weight update include slot machines \cite{aladago2021slot}, where
 random weights are generated and carefully selected during backpropagation in a way that
 minimizes the loss function.
