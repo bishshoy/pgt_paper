@@ -286,7 +286,7 @@ several ways to achieve gradient modification in the backward pass. We discuss a
 techniques in Fig. \ref{fig:gradient_altering}. One could modify the gradients at either
 \textbf{(I)} multiple points in the backward computation graph or \textbf{(II)} at a
 point very early in the backward graph and allow this changed gradient to also affect
-the rest of the network's gradients as the it backpropagates through the backward
+the rest of the network's gradients as it backpropagates through the backward
 computation graph.
 
 
@@ -342,19 +342,20 @@ this type of modification, the gradient is altered at a very early stage in the 
 computation graph and then all subsequent gradients are generated using the values
 obtained with the modified gradients (Fig. \ref{fig:gradient_altering}c). Because of the
 chain rule, network parameters whose gradients are connected to the point of alteration
-the computation graph also gets subsequently altered. It can be described as:
+in the computation graph also gets subsequently altered. It can be described as:
 
 \begin{align}
 \hspace{4cm}
 W_D^{t+1} &= W_D^t - \lambda\ f(\nabla_{W_D}(L)) & \\
-W_i^{t+1} &= W_i^t - \lambda\ \nabla_{W_i}(L) &\hspace{-3cm} i=D-1,\ldots,1
+W_i^{t+1} &= W_i^t - \lambda\ \nabla_{W_i}(L)^{*} &\hspace{-3cm} i=D-1,\ldots,1
 \end{align}
 
 where first the gradient $\nabla_{W_D}(L)$ is transformed using the transformation
 function `$f$' and then this transformed gradient is propagated through the rest of the
-backward graph and all other gradient vectors are computed as is. Because of the early
-injection of the transformed gradients, all other gradient vectors that are connected to
-the transformed gradient through the chain rule, gets subsequently altered.
+backward graph and all other gradient vectors $\nabla_{W_i}(L)^{*}$ are computed as is.
+Because of the early injection of the transformed gradients, all other gradient vectors
+that are connected to the transformed gradient through the chain rule, gets subsequently
+altered.
 
 Type I modification is computationally more expensive than Type II modification as it
 requires altering the gradients of each and every parameter individually. Type II
@@ -367,14 +368,14 @@ which both training and test accuracies improve.
 
 
 PowerGrad Transform modifies the gradients at the softmax layer, which is the earliest
-part of most convolutional neural network's computation graph. By changing the gradient
-at this stage, all other gradients for all other parameters in the network such as the
-linear layer, batchnorm statistics and convolutional layer's filter parameters are
-affected. We analyze and explore the behaviour of such alteration both mathematically
-and through empirical experiments conducted on networks without batch-normalization.
-Experimentally, we see that PGT improved training and test accuracies for both
-normalized and non-normalized networks. PGT improves a network's learning capacity and
-results in a better fit of the training data.
+part of most convolutional neural network's backward computation graph. By changing the
+gradient at this stage, all other gradients for all other parameters in the network such
+as the linear layer, batchnorm statistics and convolutional layer's filter parameters
+are affected. We analyze and explore the behaviour of such alteration both
+mathematically and through empirical experiments conducted on networks without
+batch-normalization. Experimentally, we see that PGT improved training and test
+accuracies for both normalized and non-normalized networks. PGT improves a network's
+learning capacity and results in a better fit of the training data.
 
 
 
@@ -384,9 +385,9 @@ The following are the major contributions of this paper:
 
 \item We introduce PowerGrad Transform, which decouples the backward and the forward
 passes of neural network training and enables a considerably better fit to the dataset,
-as assessed by both training and test accuracy measures. PGT is a gradient enhancement
-method that alters the gradients in the backward pass before the update step leading to
-significant boost in network's predictive performance.
+as assessed by both training and test accuracy measures. PGT is a performance
+enhancement method that alters the gradients in the backward pass before the update step
+leading to significant boost in network's predictive performance.
 
 \item We perform theoretical analysis of the properties of the PowerGrad transformation
 (section \ref{sec:pgt_prop}) and explore its effect on weight parameters and gradients
@@ -468,9 +469,25 @@ within the threshold, then their gradient is normalized by the ratio of norm of 
 gradient and norm of the weight in order to avoid gradient explosion. If $W^l$ is the
 weight matrix of the $l^\textit{th}$ layer, and $G^l$ is its gradient in the backward
 pass, then the following equation is used to modify the gradient of the $i^\textit{th}$
-filter before its update. In most cases, AGC is used for training non-BN networks. Our
-experiments demonstrate that PGT outperforms AGC, when used independently. When used
-together, it can further improve a network's performance.
+filter before its update:
+
+\begin{equation}
+G_{i}^{l}\rightarrow
+\begin{cases}
+\lambda \frac{\norm{W_{i}^{l} }_{F}^{*}}{\norm{G_{i}^{l} }_{F}} G_{i}^{l} & if\ \frac{\norm{G_{i}^{l} }_{F}}{\norm{W_{i}^{l} }_{F}^{*}} \  >\ \lambda \\
+G_{i}^{l} & otherwise
+\end{cases}
+\end{equation}
+
+
+
+The hyperparameter $\lambda$ of AGC is less sensitive to changes in batch size and depth
+as observed in \cite{brock2021high}. However, when applied to vanilla residual networks
+(ResNet-18), the performance is still afar from normalized variants as demonstrated by
+our experiments. In most cases, AGC is used for training networks without
+batch-normalization. Our experiments demonstrate that PGT outperforms AGC, when used
+independently. When used together, it can further improve a network's performance
+(section \ref{sec:Empi}).
 
 
 
@@ -504,8 +521,9 @@ PowerGrad Transform works in a much different way. PGT does not smooth the groun
 labels, rather it modifies the gradient by smoothing the predicted probability vector.
 As we show in section \ref{sec:Math}, our proposed transformation has the opposite
 effect of label smoothing. From our studies, we show that PGT in fact leads to larger
-generalization gap between the training and test dataset. Coupled with PGT, label
-smoothing can narrow the generalization gap.
+generalization gap between the training and test dataset, although it does lead to an
+increase in both training and test accuracies at convergence. Coupled with PGT, label
+smoothing can narrow the generalization gap, while retaining the benefits of PGT.
 
 
 
@@ -637,37 +655,6 @@ backward pass is using the \codeword{register_hook} function which is called in 
 \codeword{forward} function. We explore the effect of this change from a theoretical
 standpoint in section \ref{sec:Math}. In section \ref{sec:Expe}, we offer empirical data
 and experiments to support the proposed method.
-
-
-
-
-
-Two other methods that also changes the gradients in the backward pass are \textbf{i)}
-Gradient Clipping \cite{pascanu2013difficulty} \textbf{ii)} Adaptive Gradient Clipping
-\cite{brock2021high}. We introduce these two methods before delving into the inner
-workings of PowerGrad Transform.
-
-
-
-
-
-\begin{equation}
-G_{i}^{l}\rightarrow
-\begin{cases}
-\lambda \frac{\norm{W_{i}^{l} }_{F}^{*}}{\norm{G_{i}^{l} }_{F}} G_{i}^{l} & if\ \frac{\norm{G_{i}^{l} }_{F}}{\norm{W_{i}^{l} }_{F}^{*}} \  >\ \lambda \\
-G_{i}^{l} & otherwise
-\end{cases}
-\end{equation}
-
-
-
-The hyperparameter $\lambda$ of AGC is less sensitive to changes in batch size and depth
-as observed in \cite{brock2021high}. However, when applied to vanilla residual networks
-(ResNet-18), the performance is still afar from normalized variants as demonstrated by
-our experiments.
-
-
-
 
 
 
@@ -1541,7 +1528,7 @@ frequently observed during the standard training approach, especially with highe
 sizes. With PGT, gradient behavior is enhanced and the likelihood of weights attaining
 degenerate states is diminished. We provide a theoretical analysis of the PowerGrad
 transformation. With the use of different network topologies and datasets, we are able
-to show the potential of PGT and explore its impacts from a theoretical standpoint. We
+to show the potential of PGT and explore its impacts from an empirical standpoint. We
 provide comprehensive results on a number of models (non-BN and BN ResNets, SE-ResNets)
 using the ImageNet dataset. PGT helps the network to improve its learning capabilities
 by locating a more optimum convergence point. In addition, we undertake an ablation
