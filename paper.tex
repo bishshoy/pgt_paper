@@ -1060,14 +1060,14 @@ global average pooling layer downsamples the features to a fixed-size feature ve
 transfers it to the FC layer, which fits the features using regression and outputs
 logits. The logits $z_i$ produced by the FC layer are fed into a softmax layer, which
 transforms them to predicted probabilities $p_i$ using the equation $p_i=\frac
-{e^{z_i}}{\sum _i e^{z_i}}$.
+{e^{z_i}}{\sum _j e^{z_j}}$.
 
 We concentrate on the following metric: the per-filter L2-norm of each layer. Throughout
 the training process, we monitor variations in the per-filter weight norm. Because a
 full plot of each layer's data would use an inordinate amount of space, we focus on a
 few critical layers' plots. The supplementary section contains plots for each layer.
 ResNet-18 without any normalization layers is used for all experiments in this section.
-The norm of the weights of the $11\textit{th}$ convolutional layer is shown in Fig.
+The norm of the weights of the $11^\textit{th}$ convolutional layer is shown in Fig.
 \ref{fig:norm_plots}a. Layer $11$ includes $256$ filters. Each colour on the figure
 represents the evolution of a particular filter throughout the course of training
 iterations. The critical point to note is that some filters achieve a norm of zero
@@ -1242,7 +1242,7 @@ different layers. }
 In a similar fashion to the study in section \ref{sec:Empi}, we examine the norm
 profiles of features and weights in the PGT and AGC. The supplementary section includes
 all the detailed graphs of each layer. In Fig. \ref{fig:norm_plots}d, we show the
-per-filter norm plot of the $11\textit{th}$ convolutional layer as it progresses through
+per-filter norm plot of the $11^\textit{th}$ convolutional layer as it progresses through
 a PGT enabled training session. We observe that the number of zeroed out filters has
 considerably reduced. We observe similar benefits in plot of Fig. \ref{fig:norm_plots}e,
 which is the plot of the per-filter norm of the final convolutional layer. Coming to
@@ -1255,7 +1255,7 @@ regression.
 AGC is excellent at eliminating the issue of filter and feature zeroing out. However,
 AGC recovers a lower performance benefit than PGT. In the instance of PGT, we see that
 it also mitigates the zeroing out phenomenon in most layers. In Fig.\ref{fig:agc_pgt}a,
-we see a plot of the $15\textit{th}$ layer of the non-BN ResNet-18 trained without PGT.
+we see a plot of the $15^\textit{th}$ layer of the non-BN ResNet-18 trained without PGT.
 As we can see that there has been quite a few filter dropouts in the baseline. PGT
 recovers most of the filters [Fig. \ref{fig:agc_pgt}b]. In some layers however, the
 performance of PGT worsens. The $2\textit{nd}$ convolutional layer has more zeroed-out
