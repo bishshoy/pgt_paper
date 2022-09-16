@@ -123,45 +123,6 @@ Signature\underline{\hphantom{\hspace*{7cm}}} Date\underline{\hphantom{\hspace*{
   \vspace*{-1pc}
 \fi
 
-\begin{table*}[!th]
-\ifpreprint\else\vspace*{-5pc}\fi
-
-\section*{Graphical Abstract (Optional)}
-
-\vskip1pc \fbox{
-\begin{tabular}{p{.4\textwidth}p{.5\textwidth}} \bf Altering Backward Pass Gradients
-improves Convergence  \\
-Bishshoy Das, Milton Mondal\\ Brejesh Lall, Shiv Dutt Joshi, Sumantra Dutta Roy \\[1pc]
-& In standard neural network training, the gradients in the backward pass are determined
-by the forward pass. As a result, the two stages are coupled. This is how most neural
-networks are trained currently. However, gradient modification in the backward pass has
-seldom been studied in the literature. In this paper we explore decoupled training,
-where we alter the gradients in the backward pass. We propose a simple yet powerful
-method called PowerGrad Transform, that alters the gradients before the weight update in
-the backward pass and significantly enhances the predictive performance of the neural
-network. PowerGrad Transform trains the network to arrive at a better optima at
-convergence. It is computationally extremely efficient, virtually adding no additional
-cost to either memory or compute, but results in improved final accuracies on both the
-training and test sets. PowerGrad Transform is easy to integrate into existing training
-routines, requiring just a few lines of code. PowerGrad Transform makes it possible for
-the network to better fit the training data. With decoupled training, PowerGrad
-Transform improves baseline accuracies for ResNet-50 by 0.73\%, for SE-ResNet-50 by
-0.66\% and by more than 1.0\% for the non-normalized ResNet-18 network on the ImageNet
-classification task.
-\end{tabular}
-}
-
-\end{table*}
-
-\clearpage
-\thispagestyle{empty}
-
-\ifpreprint
-  \vspace*{-1pc}
-\else
-%  \vspace*{-6pc}
-\fi
-
 \begin{table*}[!t]
 \ifpreprint\else\vspace*{-15pc}\fi
 
@@ -352,10 +313,10 @@ W_i^{t+1} &= W_i^t - \lambda\ \nabla_{W_i}(L)^{*} &\hspace{-3cm} i=D-1,\ldots,1
 
 where first the gradient $\nabla_{W_D}(L)$ is transformed using the transformation
 function `$f$' and then this transformed gradient is propagated through the rest of the
-backward graph and all other gradient vectors $\nabla_{W_i}(L)^{*}$ are computed as is.
-Because of the early injection of the transformed gradients, all other gradient vectors
-that are connected to the transformed gradient through the chain rule, gets subsequently
-altered.
+backward graph. All other gradient vectors $\nabla_{W_i}(L)^{*}$ are computed as is, but
+because of the early injection of the transformed gradient $\nabla_{W_D}(L)$, all other
+gradient vectors that are connected to the transformed gradient through the chain rule
+($\nabla_{W_i}(L)^{*}$,\ \ i=D-1,\ldots,1), gets subsequently altered.
 
 Type I modification is computationally more expensive than Type II modification as it
 requires altering the gradients of each and every parameter individually. Type II
