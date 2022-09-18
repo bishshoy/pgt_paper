@@ -12,13 +12,19 @@
 \usepackage{listings}
 \usepackage{booktabs}
 \usepackage{amsthm}
+\usepackage{pifont}
 \usepackage{graphicx}
+
+% \usepackage{xcolor}
+% \usepackage{pagecolor}
+% \pagecolor{black}
+% \color{white}
 
 \graphicspath{{images/}}
 
-
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \NewDocumentCommand{\codeword}{v}{\texttt{\textcolor{orange}{#1}}}
+\newcommand{\cmark}{\ding{51}} \newcommand{\xmark}{\ding{55}}
 
 
 \definecolor{newcolor}{rgb}{.8,.349,.1}
@@ -79,10 +85,10 @@ behalf of all authors that:
 \item This manuscript, or a large part of it, \underline {has not been published,  was
 not, and is not being submitted to} any other journal. 
 
-\item If \underline {presented} at or \underline {submitted} to or \underline
-{published }at a conference(s), the conference(s) is (are) identified and  substantial
-\underline {justification for re-publication} is presented  below. A \underline {copy of
-conference paper(s) }is(are) uploaded with the  manuscript.
+\item If \underline {presented} at or \underline {submitted} to or \underline {published
+}at a conference(s), the conference(s) is (are) identified and  substantial \underline
+{justification for re-publication} is presented  below. A \underline {copy of conference
+paper(s) }is(are) uploaded with the  manuscript.
 
 \item If the manuscript appears as a preprint anywhere on the web, e.g. arXiv,  etc., it
 is identified below. The \underline {preprint should include a  statement that the paper
@@ -270,8 +276,8 @@ alteration of all other gradients. }
 
 \textbf{Type 0:} No modification: In this method, we calculate the gradients using the
 standard calculus rules and use the chain rule to calculate the gradients of the rest of
-the network's parameters, also known as backpropagation (Fig.
-\ref{fig:gradient_altering}a). The network is then updated with the gradient descent
+the network's parameters, also known as backpropagation as portrayed in Fig.
+\ref{fig:gradient_altering}(a). The network is then updated with the gradient descent
 equation:
 
 \begin{equation}
@@ -283,10 +289,11 @@ i=D,D-1,\ldots,1
 
 \textbf{Type I:} Gradient modification at multiple points independently: In this method,
 the gradients are first computed using standard procedure and then individually altered
-(Fig. \ref{fig:gradient_altering}b). Gradient clipping \cite{pascanu2013difficulty} and
-Adaptive gradient clipping \cite{brock2021high} are examples of such modifications. In
-both of these methods, the gradients are first computed using standard rules and then
-they are modified using some function. It can be described as:
+as shown in Fig. \ref{fig:gradient_altering}(b). Gradient clipping
+\cite{pascanu2013difficulty} and Adaptive gradient clipping \cite{brock2021high} are
+examples of such modifications. In both of these methods, the gradients are first
+computed using standard rules and then they are modified using some function. It can be
+described as:
 
 \begin{equation}
 \hspace{4cm}
@@ -301,9 +308,10 @@ where the gradients $\nabla_{W_i}(L)$ are transformed using the transformation f
 \textbf{Type II:} Gradient modification at a point very early in the backward graph: In
 this type of modification, the gradient is altered at a very early stage in the backward
 computation graph and then all subsequent gradients are generated using the values
-obtained with the modified gradients (Fig. \ref{fig:gradient_altering}c). Because of the
-chain rule, network parameters whose gradients are connected to the point of alteration
-in the computation graph also gets subsequently altered. It can be described as:
+obtained with the modified gradients. We illustrate this type of modification in Fig.
+\ref{fig:gradient_altering}(c). Because of the chain rule, network parameters whose
+gradients are connected to the point of alteration in the computation graph also gets
+subsequently altered. It can be described as:
 
 \begin{align}
 \hspace{4cm}
@@ -395,9 +403,9 @@ gradients, the weight updates are likewise rescaled, significantly reducing the 
 an overflow or underflow \cite{pascanu2012understanding}. GC can be used for training
 networks without batch-normalization.
 
-The formulation is as follows: If $G$ is a gradient vector which is $\partial
-L / \partial \theta$ (the gradient of the loss $L$ with respect to
-the parameters $\theta$). In clip by value, the gradients are modified as:
+The formulation is as follows: If $G$ is a gradient vector which is $\partial L /
+\partial \theta$ (the gradient of the loss $L$ with respect to the parameters $\theta$).
+In clip by value, the gradients are modified as:
 
 
 
@@ -582,10 +590,10 @@ $z_i$ represent the predicted probability values and the logits for the $i^{th}$
 respectively. Following this step, the loss function is invoked and the loss between the
 predicted probability values the ground truth labels (which is also a probability
 distribution) is calculated. If the loss function is cross-entropy loss, then the value
-of the loss is given as $L=-\sum _{i=1}^C q_i \log \left(p_i\right)$ where
-$q_i$ is the ground truth label of the $i^{th}$ class for a particular training example.
-By standard gradient update rule, we can calculate the gradient of the loss with respect
-to the logits which takes the form $\frac{\partial L}{\partial z_i}=p_i-q_i$.
+of the loss is given as $L=-\sum _{i=1}^C q_i \log \left(p_i\right)$ where $q_i$ is the
+ground truth label of the $i^{th}$ class for a particular training example. By standard
+gradient update rule, we can calculate the gradient of the loss with respect to the
+logits which takes the form $\frac{\partial L}{\partial z_i}=p_i-q_i$.
 
 The PowerGrad Transform technique is now described. We introduce a hyperparameter
 $\alpha$, which takes a value between $[0, 1]$ and regulates the degree of gradient
@@ -948,97 +956,150 @@ incorrect class logits increases due to PGT and this leads to better class separ
 
 
 
-\subsection{Experiments on Normalized Networks}
+\subsection{Experiments on convolutional neural networks (with batch-normalization)}
 \label{sec:bn}
 
 
 
-\begin{table}[t]
+\begin{figure}[!t]
 \centering
-\caption{ Results and comparisons for networks trained on ImageNet-1K. All experiments
-are performed with a 100 epoch budget. }
+\begin{subfigure}{.5\columnwidth}
+\centering
+\includegraphics[width=0.9\columnwidth]{acc_vs_epoch_r18}
+\caption{Plot of training and test accuracies (ResNet-18)}
+\end{subfigure}%
+\begin{subfigure}{.5\columnwidth}
+\centering
+\includegraphics[width=0.9\columnwidth]{acc_vs_epoch_r50}
+\caption{Plot of training and test accuracies (ResNet-50)}
+\end{subfigure}
+\caption{ Log-linear plots of training and test accuracies and comparison with baseline
+of batch-normalized variants: \textbf{(a)} ResNet-18 ($\alpha=0.25$), \textbf{(b)}
+ResNet-50 ($\alpha=0.3$). For better visualization of accuracies obtained in the final
+iterations, we plot the y-axis in log scale. PowerGrad Transform improves upon the
+baseline in all cases. The corresponding accuracies are mentioned in table
+\ref{tab:imagenet_table}. }
+\label{fig:metrics}
+\end{figure}
+
+
+
+
+\begin{table}[!t]
+\centering
+\caption{ Results and comparison table for CNN networks trained on ImageNet-1K (sorted
+in descending order w.r.t. the last column denoting test accuracy improvements over
+baseline). Best training and test accuracies are highlighted in red and blue
+respectively. Accuracy differences are highlighted in yellow. In all experiments, we
+observe that PGT positively improves both training and test accuracies. We also observe
+that deeper networks such as SE-ResNet-50 and ResNet-50 accrue higher gains over the
+baselines as compared to shallow networks like ResNet-18. }
 \label{tab:imagenet_table}
-\vspace{5pt}
-\begin{tabular}{cccccc}
-\textbf{Model} & \textbf{Scheduler} & \textbf{Method} & \textbf{Train Acc} &
-\textbf{Test Acc} & \textbf{Diff} \\
+\begin{tabular}{cccccccc}
+\multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Scheduler}} &
+\multirow{2}{*}{\textbf{Method}} & \textbf{PowerGrad} & \textbf{\hspace{-0.65cm} Train}
+& \textbf{Train} & \textbf{\hspace{-0.65cm} Test} & \textbf{Test} \\
+& & & \textbf{Transform ($\alpha$)} & \textbf{Accuracy (\%)} & \textbf{Diff (\%)} &
+\textbf{Accuracy (\%)} & \textbf{Diff (\%)} \\
 \midrule
-ResNet-18 & Step & - & 69.95 & 69.704 & - \\
-& Step & PGT & 70.3 & \textbf{69.844} & 0.14 \\
+\multirow{2}{*}{SE-ResNet-50} & \multirow{2}{*}{Cosine} & Baseline & - & 81.5 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.97}}} & 77.218 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.734}}} \\
+& & PGT & 0.3 & \textcolor{red}{\textbf{82.47}} & & \textcolor{blue}{\textbf{77.952}} & \\
 \midrule
-ResNet-18 & Cosine & - & 70.38 & 70.208 & - \\
-& Cosine & PGT & 70.53 & \textbf{70.298} & 0.09 \\
+\multirow{2}{*}{ResNet-50} & \multirow{2}{*}{Cosine} & Baseline & - & 79.18 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.5}}} & 76.56 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.656}}} \\
+& & PGT & 0.05 & \textcolor{red}{\textbf{79.68}} & & \textcolor{blue}{\textbf{77.216}} & \\
 \midrule
-ResNet-50 & Step & - & 78.99 & 75.97 & - \\
-& Step & PGT & 79.56 & \textbf{76.494} & 0.524 \\
+\multirow{2}{*}{ResNet-50} & \multirow{2}{*}{Step} & Baseline & - & 78.99 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.57}}} & 75.97 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.524}}} \\
+& & PGT & 0.05 & \textcolor{red}{\textbf{79.56}} & & \textcolor{blue}{\textbf{76.494}} & \\
 \midrule
-ResNet-50 & Cosine & - & 79.18 & 76.56 & - \\
-& Cosine & PGT & 79.68 & \textbf{77.216} & 0.656 \\
+\multirow{2}{*}{ResNet-101} & \multirow{2}{*}{Cosine} & Baseline & - & 82.29 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.81}}} & 77.896 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.362}}} \\
+& & PGT & 0.3 & \textcolor{red}{\textbf{83.1}} & & \textcolor{blue}{\textbf{78.258}} & \\
 \midrule
-ResNet-101 & Cosine & - & 82.29 & 77.896 & - \\
-& Cosine & PGT & 83.1 & \textbf{78.258} & 0.362 \\
+\multirow{2}{*}{SE-ResNet-18} & \multirow{2}{*}{Cosine} & Baseline & - & 71.42 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.18}}} & 71.09 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.346}}} \\
+& & PGT & 0.25 & \textcolor{red}{\textbf{71.6}} & & \textcolor{blue}{\textbf{71.436}} & \\
 \midrule
-SEResNet-18 & Cosine & - & 71.42 & 71.09 & - \\
-& Cosine & PGT & 71.6 & \textbf{71.436} & 0.346 \\
+\multirow{2}{*}{ResNet-18} & \multirow{2}{*}{Step} & Baseline & - & 69.95 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.35}}} & 69.704 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.14}}} \\
+& & PGT & 0.25 & \textcolor{red}{\textbf{70.3}} & & \textcolor{blue}{\textbf{69.844}} & \\
 \midrule
-SEResNet-50 & Cosine & - & 81.5 & 77.218 & - \\
-& Cosine & PGT & 82.47 & \textbf{77.952} & 0.734 \\
+\multirow{2}{*}{ResNet-18} & \multirow{2}{*}{Cosine} & Baseline & - & 70.38 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.15}}} & 70.208 &
+\textcolor{olive}{\multirow{2}{*}{\textbf{+0.09}}} \\
+& & PGT & 0.25 & \textcolor{red}{\textbf{70.53}} & & \textcolor{blue}{\textbf{70.298}} & \\
 \end{tabular}
 \end{table}
 
 
 
 
-
-
-We perform experiments on various BN variants ResNets using the ImageNet-1K dataset
-\cite{deng2009imagenet}. We observe a constant $0.09\%$ to $0.14\%$ rise in ResNet-18's
-test accuracy. What's more interesting is that we are seeing comparable improvements in
-training accuracy. PGT increases the generalization gap, as evident from this
-observation. However, it allows the network to better fit the dataset. In section
-\ref{sec:Abla}, we show how combining PowerGrad Transform with regularization techniques
-such as label smoothing may improve network performance and simultaneously reduce the
-generalization gap.
-
-We find significantly larger improvements in experiments using ResNet-50, a $0.52\%$
-increase over the step scheduling baseline and a $0.65\%$ increase over the cosine
-scheduling baseline. In studies with Squeeze-and-Excitation networks, we use the cosine
-scheduler. In these experiments, we find consistent improvements across the board, with
-SEResNet-18 \cite{hu2018squeeze} gaining $0.34\%$ and SEResNet-50 \cite{hu2018squeeze}
-gaining $0.73\%$. As we saw with ResNet-18, we find continuous improvements in training
-performance because the networks are just training better and arriving to better optimas
-at convergence. ResNet-101 training provides a modest advantage of $0.36\%$.
-
-All models are trained on four V100 GPUs with a batch size of $1024$. We utilize the
-same set of hyperparameters in each experiment, which are as follows: 100 epoch budget,
-5 epochs linear warmup phase beginning with a learning rate of $4\times 10^{-4}$ and
-ending with a peak learning rate of $0.4$. In our studies, we employ either a step
-scheduler (dividing the learning rate by $10$ at the $30^{th}$, $60^{th}$, and $90^{th}$
-epochs) or a cosine decay scheduler\footnote{Reproducible code, training recipes for the
-experiments, pretrained checkpoints and training logs are provided at: \\
-\url{https://github.com/bishshoy/power-grad-transform}. Code is adapted from
-\cite{rw2019timm}.}. We observe a consistent improvement in test metrics when utilizing
-cosine scheduling across all of our experiments. Finally, towards the conclusion of
-training, we impose a 10 epoch cooling phase in which the network is trained with a
-constant learning rate schedule set at $4\times 10^{-4}$. Other hyperparameters include
-a weight decay value of $5\times 10^{-4}$ and a momentum of $0.9$ for the SGD Nesterov
-optimizer. All of our models are trained using mixed floating point precision. The
-findings are shown in Table \ref{tab:imagenet_table}. With these findings, we observe
-that our proposed altering gradient mechanism PGT improves the model performance further
-even for batch normalized networks.
+We perform experiments on different variants ResNets using the ImageNet-1K dataset
+\cite{deng2009imagenet}. All models are trained on four V100 GPUs with a batch size of
+$1024$. We utilize a common set of hyperparameters for all experiments, which are as
+follows: 100 epoch budget, 5 epochs linear warmup phase beginning with a learning rate
+of $4\times 10^{-4}$ and ending with a peak learning rate of $0.4$, a momentum of $0.9$
+and weight decay of $5\times 10^{-4}$, the SGD Nesterov optimizer and mixed precision.
+In our studies, we employ either a step scheduler (dividing the learning rate by $10$ at
+the $30^{th}$, $60^{th}$, and $90^{th}$ epochs) or a cosine decay scheduler
+\cite{loshchilov2016sgdr}. We find $\alpha=0.25$ and $\alpha=0.05$ to be good choices
+for ResNet-18 and ResNet-50, though larger values such as $\alpha=0.3$ also have good
+performance as well. The experimental results are shown in table
+\ref{tab:imagenet_table}, and we mention the value of the PGT hyperparmeter ($\alpha$)
+in each experiment. We explore different values of $\alpha$ in section \ref{sec:Abla}
+and provide detailed grid plots in the supplementary section.
 
 
 
 
 
 
+In our experiments with Squeeze-and-Excitation variant of ResNet-50 i.e.
+SE-ResNet-50\cite{hu2018squeeze}, we observe significant improvements; a $0.97\%$ boost
+in training accuracy and a $0.734\%$ increase in test accuracy. These improvements are
+obtained with the number of epochs being kept the same as that of the baseline model.
+Alternatively, practioners can choose to employ PGT and have the networks converge to
+accuracies similar to that of the baseline with a much lower epoch budget. We explore
+this in detail in section \ref{sec:speed}. Therefore, PGT also speeds up training. In
+our experiments with ResNet-50, we find an increase of $0.5\%$ and $0.656\%$ performance
+enhancement over the baseline while using the cosine scheduler. The corresponding
+improvement over the step scheduler baseline for ResNet-50 is $0.57\%$ and $0.524\%$
+respectively for training and testing. ResNet-101 sees a higher improvement in training
+fit, $0.81\%$ to be exact, while the improvement over the test set is $0.362\%$. Smaller
+networks such as SE-ResNet-18 and ResNet-18 sees accuracy boosts which are smaller but
+nevertheless positive. Therefore we conclude that with PGT, the consistent improvements
+in training accuracies across all cases is because the networks train better and arrive
+at better optimas during convergence. Per epoch training and test accuracy plots of
+ResNet-18 and ResNet-50 (both with and without PGT) are shown in Fig.
+\ref{fig:metrics}(a, b). For better visualization of the top end of the plots, we scale
+the y-axis in log scale. Our experiments with batch-normalized networks indicate that
+PowerGrad Transform speeds up training and allows the network to learn better
+representations\footnote{Reproducible code, training recipes for the experiments,
+pretrained checkpoints and training logs are provided at: \\
+\url{ https://github.com/bishshoy/power-grad-transform }. Code is adapted from
+\cite{rw2019timm}.}.
 
 
 
 
 
 
-\subsection{Empirical Studies on Residual Networks without Batch Normalization}
+
+
+
+
+
+
+
+\subsection{Empirical studies on networks without Batch Normalization}
 \label{sec:Empi}
 
 
@@ -1047,36 +1108,33 @@ even for batch normalized networks.
 
 
 This section empirically examines some of the issues that occur when networks are
-trained without normalization layers. ResNet-18 \cite{he2016deep} is used as the
+trained without normalization layers and we provide insight into the effects of
+PowerGrad transform on such networks. We use ResNet-18 \cite{he2016deep} as the
 foundation model for all empirical trials owing to its popularity among deep learning
 practitioners and the relative simplicity with which it can be trained on a big dataset
-such as ImageNet \cite{russakovsky2015imagenet}. ResNet-18 is composed of $20$
-convolutional layers and one fully connected (FC) layer. At the input, it has a single
-convolutional layer with filters of size $7\times 7$. Three convolutional layers are
-placed in the downsampling skip connections. The remaining convolutional layers have
-several $3\times 3$ filters that are grouped together to create a block. Each basic
-block is connected by a skip connection. At the end of all convolutional layers, a
-global average pooling layer downsamples the features to a fixed-size feature vector and
-transfers it to the FC layer, which fits the features using regression and outputs
-logits. The logits $z_i$ produced by the FC layer are fed into a softmax layer, which
-transforms them to predicted probabilities $p_i$ using the equation $p_i=\frac
-{e^{z_i}}{\sum _j e^{z_j}}$.
+such as ImageNet-1K \cite{russakovsky2015imagenet}. We found deeper networks (such as
+ResNet-34 and ResNet-50 models) are impossible to train without BatchNormalization
+because of increased depth. So in order to conduct our empirical experiments, we solely
+focus on the ResNet-18 architecture. For our experiments, we designate different layers
+with their corresponding layer indices. We provide a detailed layer-wise index list of
+ResNet-18 in the supplementary section.
 
-We concentrate on the following metric: the per-filter L2-norm of each layer. Throughout
-the training process, we monitor variations in the per-filter weight norm. Because a
-full plot of each layer's data would use an inordinate amount of space, we focus on a
-few critical layers' plots. The supplementary section contains plots for each layer.
-ResNet-18 without any normalization layers is used for all experiments in this section.
-The norm of the weights of the $11^\textit{th}$ convolutional layer is shown in Fig.
-\ref{fig:norm_plots}a. Layer $11$ includes $256$ filters. Each colour on the figure
-represents the evolution of a particular filter throughout the course of training
-iterations. The critical point to note is that some filters achieve a norm of zero
-during training. This event is referred to as `Zeroing Out', and occurs when a channel
-of a weight tensor gets fully filled with zeros. If all the coefficients of the filter
-is 0 then only L2 norm of a filter can become zero. If we observe zero filter norm for a
-filter, then that filter does not contribute at all to determine the input-output
-relationship of a dataset. According to our findings, when a filter tensor becomes
-zeroed out, it does not recover with further training.
+We concentrate on the following metric: the per-filter L2-norm of each layer's weight
+tensor. Throughout the training process, we monitor variations in the per-filter weight
+norm. Because a full plot of each layer's data would use an inordinate amount of space,
+we focus on a few critical layers' plots. The supplementary section contains full plots
+for all layer for various settings. The norm of the weights of the $11^\textit{th}$
+convolutional layer is shown in Fig. \ref{fig:norm_plots}(a). Layer $11$ includes $256$
+filters. Each colour on the figure represents the iteration-wise evolution of a
+particular filter throughout the course of training. The critical point to note is that
+some filters achieve a norm of zero during training. We refer to this event as `Zeroing
+Out', and occurs when a channel of a weight tensor gets fully filled with zeros. If all
+the coefficients of the filter becomes zero, only then the L2 norm of that filter
+becomes zero. If we observe zero filter norm for a filter, then that filter does not
+contribute at all to determine the input-output relationship of a dataset, as the
+feature tensor it produces is also an all-zero tensor. According to our findings, when a
+filter tensor becomes zeroed out, it does not recover with further training. We observe
+both effects \textbf{1)} zeroed out filter \textbf{2)} zeroed out feature.
 
 
 \begin{figure}[t]
@@ -1119,37 +1177,33 @@ better learning. }
 
 
 
-Similar to the plot \ref{fig:norm_plots}a, we see the plot of the final convolutional
-layer in Fig. \ref{fig:norm_plots}b, where we observe a number of filters / units
+Similar to the plot \ref{fig:norm_plots}(a), we see the plot of the final convolutional
+layer in Fig. \ref{fig:norm_plots}(b), where we observe a number of filters / units
 completely dropping out towards the end of training leading to underutilization of the
-network's resources. We also plot the final layer's feature norm computed in a per
-channel fashion. In Fig. \ref{fig:norm_plots}c, we see the norm of the feature vector at
-the output side of the global average pooling layer of ResNet-18. The feature vector
-here directly interfaces with the fully connected layer immediately after. Any zeroed
-out regions in this tensor directly leads to permanent information loss, as it does not
-contribute to the learning of decision boundaries in the upcoming fully connected layer.
-
-We observe both effects \textbf{1)} zeroed-out filter \textbf{2)} zeroed-out feature.
-The impact of having a zeroed-out filter or a feature might have a variety of
-consequences for training and optimization. If a zeroed out filter is present in a
-convolutional layer, there are two possible outcomes. For starters, if the layer is
-immediately followed by a fully connected regression layer, there is an abrupt loss of
-information. For the reason that a zeroed out filter always generates zeroed out
+network's parameters. In Fig. \ref{fig:norm_plots}(c), we see the norm of the feature
+vector at the output side of the global average pooling layer of ResNet-18. The feature
+vector here directly interfaces with the fully connected layer immediately after. Any
+zeroed out regions in this tensor directly leads to permanent information loss, as it
+does not contribute to the learning of decision boundaries in the upcoming fully
+connected layer, and indeed there exists a few zeroed out features in the baseline
+model, which we discuss next. The impact of having a zeroed out filter or a feature
+might have a variety of consequences for training and optimization. If a zeroed out
+filter is present in a convolutional layer, there are two possible outcomes. If the
+layer is immediately followed by a fully connected regression layer, there is an abrupt
+loss of information. For the reason that a zeroed out filter always generates zeroed out
 features regardless of the input image, when this tensor is fed to a fully connected
 layer, it does not communicate any information that is useful for classification. In the
 event that the zeroed out filter has a skip connection linked across it, this may be
 circumvented as long as there are no overlapping zeroed out channels in the two feature
-maps.
-
-On the other hand, if a feature tensor has a zeroed out channel at the input of a layer,
-the layer creates a zeroed out feature channel at the output, regardless of the weights.
-However, if there is a zeroed out channel in the feature map just before the fully
-connected layer, then this results in a permanent loss of information as it does not
-contribute to the learning of decision boundaries. ResNet-18 suffers from the same kind
-of information loss, as the final feature tensor (which is generated after the global
-average pooling layer) has multiple channels that are zeroed out [Fig.
-\ref{fig:norm_plots}c]. This information collapse phenomenon occurs when a channel that
-has been zeroed out stays zeroed out for all images in the dataset.
+maps. On the other hand, if a feature tensor has a zeroed out channel at the input of a
+layer, the layer creates a zeroed out feature channel at the output, regardless of the
+weights. However, if there is a zeroed out channel in the feature map just before the
+fully connected layer, then this results in a permanent loss of information as it does
+not contribute to the learning of decision boundaries. ResNet-18 suffers from the same
+kind of information loss, as the final feature tensor (which is generated after the
+global average pooling layer) has multiple channels that are zeroed out [Fig.
+\ref{fig:norm_plots}(c)]. This information collapse phenomenon occurs when a channel
+that has been zeroed out stays zeroed out for all images in the dataset.
 
 
 
@@ -1172,25 +1226,25 @@ zeroes out during training. }
 
 
 The impact of a feature tensor or weight tensor being zeroed out is seen to be
-particularly common at larger batch size training procedures in networks without
-normalization layers. As a result, the network's capacity is underutilized since some of
-the filters are not involved in extracting any useful information that is important for
-performing classification. When working with large batch sizes, it is possible that an
-entire layer zeroes out [Fig. \ref{fig:high_bs}]. In a network without skip connections,
-this can cause a full collapse in training. For example if a weight tensor completely
-zeroes out, and it always produces a zero feature tensor, then the input feature tensor
-to the next convolutional layer is a zero tensor and thus the output of the next layer
-is always a zero tensor irrespective of its weights, and this continues until the end of
-the neural network pipeline leading to zero logits. Also, zeroed out weights tensors
-lead to zeroed out gradients hence stopping training for all subsequent iterations
-leading to a collapse in training. Although residual networks bypass this difficulty via
-the use of the skip connection, it does not solve the layer's non-participation in the
-overall objective of classification. It is possible to solve this issue by using methods
-such as gradient clipping (GC), adaptive gradient clipping (AGC), and PowerGrad
-Transform (PGT), all of which regulate the amount of gradient that flows at various
-junctions of the network. GC and AGC modify the gradients at each and every filter of
-every layer. PGT performs this operation at only one junction, which is at the softmax
-layer.
+particularly common in training procedures involving larger batch sizes in networks
+without normalization layers. As a result, the network's parameters are underutilized
+since some of the filters are not involved in extracting any useful information that is
+important for performing classification. When working with large batch sizes, it is
+possible that an entire layer zeroes out [Fig. \ref{fig:high_bs}]. In a network without
+skip connections, this can cause a full collapse in training. For example, if a weight
+tensor completely zeroes out, and it always produces a zero feature tensor, then the
+input feature tensor to the next convolutional layer is a zero tensor and thus the
+output of the next layer is always a zero tensor irrespective of its weights, and this
+continues until the end of the neural network pipeline leading to zero logits. Also,
+zeroed out weights tensors lead to zeroed out gradients hence stopping training for all
+subsequent iterations leading to a collapse in training. Although residual networks
+bypass this difficulty via the use of the skip connection, it does not solve the layer's
+non-participation in the overall objective of classification. It is possible to solve
+this issue by using methods such as gradient clipping (GC), adaptive gradient clipping
+(AGC), and PowerGrad Transform (PGT), all of which regulate the amount of gradient that
+flows at various junctions of the network. GC and AGC modify the gradients at each and
+every filter of every layer. PGT performs this operation at only one junction, which is
+at the softmax layer.
 
 
 
@@ -1241,62 +1295,67 @@ different layers. }
 
 In a similar fashion to the study in section \ref{sec:Empi}, we examine the norm
 profiles of features and weights in the PGT and AGC. The supplementary section includes
-all the detailed graphs of each layer. In Fig. \ref{fig:norm_plots}d, we show the
-per-filter norm plot of the $11^\textit{th}$ convolutional layer as it progresses through
-a PGT enabled training session. We observe that the number of zeroed out filters has
-considerably reduced. We observe similar benefits in plot of Fig. \ref{fig:norm_plots}e,
-which is the plot of the per-filter norm of the final convolutional layer. Coming to
-benefits in feature norms, we observe in plot of Fig. \ref{fig:norm_plots}f, the final
-feature tensor obtained with PGT enabled training do not contain any zeroed out regions,
-leading us to assert that information loss is heavily mitigated as the features pass on
-from the feature extracting convolutional layers to the fully connected stage for
-regression.
+all the detailed graphs of all layer. In Fig. \ref{fig:norm_plots}(d), we show the
+per-filter norm plot of the $11^\textit{th}$ convolutional layer as it progresses
+through a PGT enabled training session. We observe that the number of zeroed out filters
+has considerably reduced. We observe similar benefits in plot of Fig.
+\ref{fig:norm_plots}(e), which is the plot of the per-filter norm of the final
+convolutional layer. Coming to benefits in feature norms, we observe in plot of Fig.
+\ref{fig:norm_plots}(f), the final feature tensor obtained with PGT enabled training do
+not contain any zeroed out regions, leading us to assert that information loss is
+heavily mitigated as the features pass on from the feature extracting convolutional
+layers to the fully connected stage for regression.
 
 AGC is excellent at eliminating the issue of filter and feature zeroing out. However,
 AGC recovers a lower performance benefit than PGT. In the instance of PGT, we see that
-it also mitigates the zeroing out phenomenon in most layers. In Fig.\ref{fig:agc_pgt}a,
-we see a plot of the $15^\textit{th}$ layer of the non-BN ResNet-18 trained without PGT.
-As we can see that there has been quite a few filter dropouts in the baseline. PGT
-recovers most of the filters [Fig. \ref{fig:agc_pgt}b]. In some layers however, the
-performance of PGT worsens. The $2\textit{nd}$ convolutional layer has more zeroed-out
-filters in PGT [Fig. \ref{fig:agc_pgt}e] than in the baseline [Fig. \ref{fig:agc_pgt}d].
-Despite that, PGT achieves a greater overall accuracy. This necessitates the
-simultaneous use of AGC and PGT.
-
-The advantage of combining GC with PGT is not significant. When AGC and PGT are
-combined, we see a tremendous increase in accuracy of over $2.06\%$ over the baseline.
-As seen in Fig. \ref{fig:agc_pgt}c and \ref{fig:agc_pgt}f, activating AGC and PGT
-concurrently results in no filter dropouts in all layers while also improving the
-accuracy by a significant margin. Additionally, we give comprehensive graphs of the norm
-profiles of the AGC + PGT method for all layers in the supplementary section.
-
-
-\subsection{Towards removing Normalization}
-\label{sec:Towa}
+it also mitigates the zeroing out phenomenon in most layers. In
+Fig.\ref{fig:agc_pgt}(a), we see a plot of the $15^\textit{th}$ layer of the non-BN
+ResNet-18 trained without PGT. As we can see that there has been quite a few filter
+dropouts in the baseline. PGT recovers most of the filters [Fig. \ref{fig:agc_pgt}(b)].
+In some layers however, the performance of PGT is slightly weaker than the baseline. The
+$2^\textit{nd}$ convolutional layer has more zeroed out filters in PGT [Fig.
+\ref{fig:agc_pgt}(e)] than in the baseline [Fig. \ref{fig:agc_pgt}(d)]. Despite that,
+PGT achieves a higher overall accuracy (table \ref{tab:wobn_table}). This necessitates
+the simultaneous use of AGC and PGT, for the non-BN ResNet-18.
 
 
 
-\begin{table}[t]
+\begin{table}[!t]
 \centering
 \caption{ Results for non-normalized ResNets on ImageNet-1K. Each experiment is
-conducted with a 100 epoch budget. }
+conducted with a 100 epoch budget using the cosine decay scheduler. Best training and
+test accuracies are highlighted in red and blue respectively. Top differences in
+training and test accuracies are marked in yellow. The baselines in each segment is
+taken as the reference point for all `Diff' accuracies in that segment. The first three
+segments highlight comparison for experiments where the methods are applied
+individually, while the last segment denotes performance metrics for combinations of
+different methods (GC + PGT, AGC + PGT). We see that at any batch size, with PGT, the
+performance of non-normalized version of ResNet-18 improves significantly over the
+baseline owing to the improvements in training as observed in Fig. \ref{fig:agc_pgt}. }
 \label{tab:wobn_table}
-\vspace{5pt}
-\begin{tabular}{cccccc}
-\textbf{Model} & \textbf{Batch Size} & \textbf{Method} & \textbf{Train Acc} &
-\textbf{Test Acc} & \textbf{Diff} \\
+\begin{tabular}{cccccccc}
+\multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Batch Size}} &
+\multirow{2}{*}{\textbf{Method}} & \textbf{PowerGrad} & \textbf{\hspace{-0.65cm} Train}
+& \textbf{Train} & \textbf{\hspace{-0.65cm} Test} & \textbf{Test} \\
+& & & \textbf{Transform ($\alpha$)} & \textbf{Accuracy (\%)} & \textbf{Diff (\%)} &
+\textbf{Accuracy (\%)} & \textbf{Diff (\%)} \\
 \midrule
-ResNet-18 (non-BN) & 1024 & - & 67.19 & 64.93 & - \\
-\midrule
-ResNet-18 (non-BN) & 512 & - & 68.02 & 66.552 & - \\
-& 512 & PGT & 69.5 & \textbf{67.236} & 0.684 \\
-\midrule
-ResNet-18 (non-BN) & 256 & - & 68.86 & 66.796 & - \\
-& 256 & GC & 69.04 & 67.064 & 0.268 \\
-& 256 & AGC & 69.06 & 67.298 & 0.502 \\
-& 256 & PGT & 69.97 & \textbf{67.814} & 1.018 \\
-& 256 & GC+PGT & 68.67 & 67.088 & 0.292 \\
-& 256 & AGC+PGT & 70.92 & \textbf{68.856} & 2.06 \\
+ResNet-18 (non-BN) & 1024 & Baseline & - & 67.19 & - & 64.93 & - \\
+\cmidrule{2-8}
+& 512 & Baseline & - & 68.02 & - & 66.552 & - \\
+& 512 & PGT & 0.25 & \textcolor{red}{\textbf{69.5}} & \textcolor{olive}{\textbf{+1.48}} &
+\textcolor{blue}{\textbf{67.236}} & \textcolor{olive}{\textbf{+0.684}} \\
+\cmidrule{2-8}
+& 256 & Baseline & - & 68.86 & - & 66.796 & - \\
+& 256 & GC & - & 69.04 & +0.18 & 67.064 & +0.268 \\
+& 256 & AGC & - & 69.06 & +0.2 & 67.298 & +0.502 \\
+& 256 & PGT & 0.25 & \textcolor{red}{\textbf{69.97}} & \textcolor{olive}{\textbf{+1.11}} &
+\textcolor{blue}{\textbf{67.814}} & \textcolor{olive}{\textbf{+1.018}} \\
+\cmidrule{2-8}
+& 256 & Baseline & - & 68.86 & - & 66.796 & - \\
+& 256 & GC+PGT & 0.25 & 68.67 & -0.19 & 67.088 & +0.292 \\
+& 256 & AGC+PGT & 0.25 & \textcolor{red}{\textbf{70.92}} & \textcolor{olive}{\textbf{+2.06}} &
+\textcolor{blue}{\textbf{68.856}} & \textcolor{olive}{\textbf{+2.06}} \\
 \end{tabular}
 \end{table}
 
@@ -1308,40 +1367,49 @@ ResNet-18 (non-BN) & 256 & - & 68.86 & 66.796 & - \\
 
 
 
-Experiments are carried out on non-Batch Normalized networks. We specifically utilize
-the ResNet-18 model and train it on ImageNet-1K which has 1.28 million images divided
-into 1000 classes. ImageNet-1K's test set consists of 50 images per class. Table
-\ref{tab:wobn_table} shows the findings.
+We provide accuracy results for different batch sizes for the non-BN ResNet-18 trained
+on ImageNet-1K and also experiment with different methods (GC, AGC, PGT along with their
+combinations). Table \ref{tab:wobn_table} shows the findings. To begin, we use a batch
+size of 1024. This is only to illustrate that in unnormalized networks, accuracy suffers
+significantly when batch sizes are large. Additionally, the training process is often
+unstable at this batch size, resulting in frequent layer dropouts (as seen in
+\ref{sec:Empi}) and infinite loss values. Thus for all subsequent tests, we use batch
+sizes of 512 and 256. At a batch size of 512, invoking PGT with $\alpha=0.25$ improves
+the training accuracy baseline by $1.48\%$ and the test accuracy baseline by $0.684\%$,
+while at a batch size of 256, the improvement in training and test accuracies are
+$1.11\%$ and $1.018\%$ respectively. In comparison, the test accuracy improvements
+obtained by GC and AGC at batch size of 256 is much less, at $0.27\%$ and $0.5\%$,
+respectively.
 
-To begin, we use a batch size of 1024. This is only to illustrate that in unnormalized
-networks, accuracy suffers significantly when batch sizes are large. Additionally, the
-training process is often unstable, resulting in frequent layer dropouts (as seen in
-\ref{sec:Empi}) and sometimes infinite loss values. Thus, for all subsequent tests, we
-mostly use batch sizes of 512 and 256. We find $\alpha=0.25$ and $\alpha=0.05$ to be
-mostly optimal for ResNet-18 and ResNet-50, though larger values such as $\alpha=0.3$
-also have good performance as well. We explore different values of $\alpha$ in section
-\ref{sec:Abla}. For ResNet-18, invoking PGT with $\alpha=0.25$ improves the baseline by
-$0.68\%$ when the batch size is 512, and by over $1\%$ when the batch size is 256. In
-comparison, the improvement obtained by GC and AGC is much less, at $0.27\%$ and
-$0.5\%$, respectively.
+On the training accuracy front, since we get a significant boost ($1.48\%$ at batch size
+of 512 and $1.11\%$ at batch size of 256), it leads us to infer that when PowerGrad
+Transform is used, the network fits the training dataset more tightly and the
+convergence optima is significantly superior. We also notice that the training versus
+testing gap increases with PGT as compared to the gap at baseline even though both
+training and test performance is improved. This allows us to infer that PGT increases
+the generalization gap between the training and the test set, despite improvements in
+both training and test performance. Therefore it allows us to conclude that the
+improvements in training and test accuracies are obtained not through regularization
+like it does in methods such as label smoothing; rather the improvements are obtained as
+PGT enables the network to utilize its learning capacity better and arrive at a higher
+performing optima at convergence, something which is inaccessible through traditional
+gradient based training.
 
-On the metric of training accuracy, we get a $1.48\%$ increase in training accuracy at a
-batch size of 512 and an improvement of $1.11\%$ at a batch size of 256, leading us to
-infer that when PowerGrad Transform is used, the network's convergence optima is
-significantly superior. We also notice that the training versus testing gap increases
-with PGT as compared to the gap obtained at baseline. This allows us to infer that PGT
-increases the generalization gap between the training and the test set. The improvement
-in training and test accuracies are obtained not through regularization like it does in
-methods such as label smoothing. The improvement in both training and test accuracies
-are obtained as PGT enables the network to utilize its learning capacity better and
-arrive at a better optima at convergence.
-
+We also experiment with combinations of GC/AGC and PGT. The advantage of combining GC
+with PGT is not very significant. When AGC and PGT are combined, we see a tremendous
+increase in test accuracy of over $2.06\%$ over the baseline. As seen in Fig.
+\ref{fig:agc_pgt}(c) and \ref{fig:agc_pgt}(f), activating AGC and PGT concurrently
+results in no filter dropouts in all layers while also improving the accuracy by a
+significant margin. Additionally, we provide comprehensive graphs of the norm profiles
+of the AGC + PGT method for all layers in the supplementary section.
 
 
 
 
 
-\subsection{Effect on Loss, Logits and other Metrics}
+
+
+\subsection{Effect on Loss, Logits and other metrics}
 \label{sec:Effe}
 
 
@@ -1376,101 +1444,88 @@ settings. \textbf{(c)} Correlation between loss and logits. Regression line equa
 
 
 
-As seen in Fig. \ref{fig:stats}a, the logit norm increases as $\alpha$ falls from $1$ to
-$0$. In the initial training phase, PGT causes the gradient in both the valid and wrong
-classes to rise as the network misclassifies majority of the examples. Due to the
+As seen in Fig. \ref{fig:stats}(a), the logit norm increases as $\alpha$ falls from $1$
+to $0$. In the initial training phase, PGT causes the gradient in both the valid and
+wrong classes to rise as the network misclassifies majority of the examples. Due to the
 exponential nature of the softmax function, the predicted probability distribution may
 frequently be close to a delta distribution, even in instances of misclassifications.
 PGT reshapes the predicted probability distribution. It redistributes probability from
 the confident classes to the less confident ones. Gradient rises in all classes. We also
 see that the final value of the loss rises as $\alpha$ drops, and that the logit norm
-and the final value of the loss are linearly correlated Fig. \ref{fig:stats}c. What is
-surprising is that greater accuracies may be acquired at larger loss values, at
-convergence. This is markedly different from the coupled gradient descent based training
-procedures. From these plots of logits and losses we find that with the inclusion of PGT
-in the training process, the model can have higher loss values at convergence compared
-to the loss when not using PGT. However, this decoupled gradient based training provides
-greater accuracies than the standard way of training even though the loss value is
-higher.
+and the final value of the loss are linearly correlated Fig. \ref{fig:stats}(c). What is
+surprising is that: \textit{greater accuracies may be acquired at larger loss values at
+convergence}. This is markedly different from the coupled gradient descent based
+training procedures. PGT enables the network to arrive at such optima where the loss
+values are high, but both training and test perfomance is better. From these plots of
+logits and losses we find that with the inclusion of PGT in the training process, the
+model can have access to such regions of the loss landscape that is otherwise
+inaccessible to traditional gradient based training procedures.
 
 
 
 
 
-
-
-\begin{figure}[!t]
-\centering
-\begin{subfigure}{.5\columnwidth}
-\centering
-\includegraphics[width=0.9\columnwidth]{acc_vs_epoch_r18}
-\caption{Plot of training and test accuracies (ResNet-18)}
-\end{subfigure}%
-\begin{subfigure}{.5\columnwidth}
-\centering
-\includegraphics[width=0.9\columnwidth]{acc_vs_epoch_r50}
-\caption{Plot of training and test accuracies (ResNet-50)}
-\end{subfigure}
-\caption{ Log-linear plots of training and test accuracies and comparison with baseline
-of batch-normalized variants: \textbf{(a)} ResNet-18 ($\alpha=0.25$), \textbf{(b)}
-ResNet-50 ($\alpha=0.3$). PGT (PowerGrad Transform) improves upon baseline in all cases.
-}
-\label{fig:metrics}
-\end{figure}
-
-
-
-
-
-
-
-
-
-ResNet-18 and ResNet-50 per epoch training and test accuracies with and without PGT are
-shown in Fig. \ref{fig:metrics}a,b. In all instances, we observe a gain. This means that
-PowerGrad Transform forces the network to learn better representations.
 
 
 \section{Ablation Study}
 \label{sec:Abla}
 
 
-\begin{table}[t]
+\begin{table}[!t]
 \centering
 \caption{ Ablation study for ResNet-50 on ImageNet-1K. LS column denotes whether label
 smoothing has been applied. A smoothing hyperparameter value of $0.1$ has been used. The
 hyperparameter column that controls the amount of PGT gradient modification injected at
-softmax, eq. (\ref{transformed_probabilities}). }
+softmax, Eq. \ref{transformed_probabilities}. }
 \label{tab:ablation_table}
-\vspace{5pt}
 \begin{tabular}{ccccccc}
-\textbf{Model} & \textbf{Scheduler} & \textbf{LS} & \textbf{Hparams} & \textbf{Train
-Acc} & \textbf{Test Acc} & \textbf{Gap} \\
+\multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Scheduler}} & \textbf{Label} &
+\textbf{PowerGrad} & \textbf{Train} & \textbf{Test} & \multirow{2}{*}{\textbf{Gap}} \\
+& & \textbf{Smoothing} & \textbf{Transform ($\alpha$)} & \textbf{Accuracy (\%)} &
+\textbf{Accuracy (\%)} & \\
 \midrule
-ResNet-50 & Step &  & - & 78.99 & 75.97 & 3.02 \\
-& Step &  & 0.3 & 79.56 & 76.494 & 3.066 \\
-& Cosine &  & - & 79.18 & 76.56 & 2.62 \\
-& Cosine & $\checkmark$ & - & 78.81 & 76.698 & 2.112 \\
-& Cosine &  & 0.3 & 79.43 & 76.886 & 2.544 \\
-& Cosine & $\checkmark$ & 0.3 & 78.47 & 76.968 & 1.502 \\
-& Cosine &  & 0.05 & 79.68 & \textbf{77.216} & 2.464 \\
-& Cosine & $\checkmark$ & 0.05 & 77.69 & 76.39 & 1.3 \\
+ResNet-50 & Step & \xmark & \xmark & 78.99 & 75.97 & 3.02 \\
+& Step & \xmark & 0.3 & 79.56 & 76.494 & 3.066 \\
+\cmidrule{2-7}
+& Cosine & \xmark & \xmark & 79.18 & 76.56 & 2.62 \\
+& Cosine & 0.1 & \xmark & 78.81 & 76.698 & 2.112 \\
+\cmidrule{2-7}
+& Cosine & \xmark & 0.3 & 79.43 & 76.886 & 2.544 \\
+& Cosine & 0.1 & 0.3 & 78.47 & 76.968 & 1.502 \\
+\cmidrule{2-7}
+& Cosine & \xmark & 0.05 & 79.68 & 77.216 & 2.464 \\
+& Cosine & 0.1 & 0.05 & 77.69 & 76.39 & 1.3 \\
 \end{tabular}
 \end{table}
 
 
 
 
-We conduct an ablation study to investigate the consequences of PowerGrad Transform. We
-have previously demonstrated from the experiments depicted in section \ref{sec:Expe}
-that PowerGrad Transform causes the network to arrive at a better optima and fit a
-particular training dataset better than the baseline. We combine our approach with other
-regularization techniques such as label smoothing. The findings are shown in the Table
-\ref{tab:ablation_table}. We see that adding PowerGrad Transform increases the gap
-between the training and test accuracies, while introducing a label smoothing
-regularizer decreases the gap. We also investigate the two optimas obtained from
-ResNet-50's grid search. PGT with label smoothing improves the accuracy at $\alpha=0.3$
-but it hurts the accuracy at $\alpha=0.05$.
+We conduct an ablation study to investigate the effects of PowerGrad Transform for
+different values of the PGT hyperparameter($\alpha$). Grid plots are made available in
+the supplementary section. We have previously demonstrated from the experiments depicted
+in section \ref{sec:Expe}, that PowerGrad Transform causes the network to arrive at a
+better optima and fit the training dataset better than the baseline. In this ablation
+study, we use the ResNet-50 architecture and we combine our proposed method with other
+regularization techniques such as label smoothing and report our findings in table
+\ref{tab:ablation_table}. We also investigate the two optimal peaks of the
+hyperparameter ($\alpha$) obtained from ResNet-50's grid search ($\alpha=0.05$ and
+$\alpha=0.3$). First, we examine the effect of PGT on the step scheduler baseline in
+order to later compare it to the cosine scheduler baseline. PGT improves upon the step
+scheduler baseline (test set) by a substantial margin with $0.524\%$ ($76.494\%$ as
+opposed to $75.97\%$). Introducing the cosine scheduler yields a $0.59\%$ improvement
+($76.56\%$ vs. $75.97\%$) over the step scheduler. After introducing label smoothing,
+the test accuracy relative to the cosine scheduler baseline increases by only $0.138\%$
+(from $76.56\%$ to $76.698\%$). However, introducing PGT with $\alpha=0.3$ alone
+(without label smoothing) improves the cosine scheduler baseline by $0.326\%$
+($76.886\%$ vs. $76.56\%$). Combining PGT ($\alpha=0.3$) with label smoothing improves
+the performance on the test set further by $0.408\%$ (from $76.56\%$ to $76.968\%$) and
+reduces the generalization gap (from $2.54\%$ to $1.5\%$). However, the impact of
+combining PGT with label smoothing can vary depending on the value of the hyperparameter
+$\alpha$. With a PGT hyperparameter value of $\alpha=0.05$, we notice the greatest
+performance improvement, $1.246\%$ over the step scheduler test baseline and $0.656\%$
+over the cosine scheduler test baseline. Adding label smoothing to PGT ($\alpha=0.05$)
+hurts performance even though it reduces the generalization gap.
 
 
 
@@ -1521,31 +1576,43 @@ In PyTorch, the available method to modify gradients in the backward pass is usi
 
 
 
-\newpage \subsubsection{Norm plots of weights (baseline)} \begin{figure}[h] \centering
-\includegraphics[width=0.55\textwidth]{baseline-w_norm} \caption{ Method: baseline. This
-is a plot depicting the evolution of the norm of each filter in each layer. Each subplot
+\newpage \subsection{Grid search for different values of $\alpha$}
+
+
+
+
+
+\newpage \subsection{Norm plots of weights (baseline (low batch size)) of non-BN
+ResNet-18}
+\begin{figure}[h] \centering \includegraphics[width=0.55\textwidth]{baseline-w_norm}
+\caption{ Method: baseline, batch size = 256. This is a plot depicting the
+iteration-wise evolution of the norm of each filter in each layer. Each subplot
 corresponds to a layer of the unnormalized ResNet-18. Above each subplot, the layer
 indices are shown. Each filter in each subplot is shown with a separate and randomly
 determined colour. } \end{figure}
 
-\newpage \subsubsection{Norm plots of weights (baseline (high batch size))}
+\newpage \subsection{Norm plots of weights (baseline (high batch size)) of non-BN
+ResNet-18}
 \begin{figure}[h] \centering
 \includegraphics[width=0.55\textwidth]{baseline_high_bs-w_norm} \caption{ Method:
-baseline (high batch size). This is a plot depicting the evolution of the norm of each
-filter in each layer. Each subplot corresponds to a layer of the unnormalized ResNet-18.
-Above each subplot, the layer indices are shown. Each filter in each subplot is shown
-with a separate and randomly determined colour. } \end{figure}
-
-\newpage \subsubsection{Norm plots of weights (PGT)} \begin{figure}[h] \centering
-\includegraphics[width=0.55\textwidth]{pgt-w_norm} \caption{ Method: PGT. This is a plot
-depicting the evolution of the norm of each filter in each layer. Each subplot
+baseline (high batch size), batch size = 1024. This is a plot depicting the
+iteration-wise evolution of the norm of each filter in each layer. Each subplot
 corresponds to a layer of the unnormalized ResNet-18. Above each subplot, the layer
 indices are shown. Each filter in each subplot is shown with a separate and randomly
 determined colour. } \end{figure}
 
-\newpage \subsubsection{Norm plots of weights (AGC + PGT)} \begin{figure}[h] \centering
-\includegraphics[width=0.55\textwidth]{agc_pgt-w_norm} \caption{ Method: AGC + PGT. This
-is a plot depicting the evolution of the norm of each filter in each layer. Each subplot
+\newpage \subsection{Norm plots of weights (PGT) of non-BN ResNet-18}
+\begin{figure}[h] \centering \includegraphics[width=0.55\textwidth]{pgt-w_norm}
+\caption{ Method: PGT, batch size = 256. This is a plot depicting the iteration-wise
+evolution of the norm of each filter in each layer. Each subplot corresponds to a layer
+of the unnormalized ResNet-18. Above each subplot, the layer indices are shown. Each
+filter in each subplot is shown with a separate and randomly determined colour. }
+\end{figure}
+
+\newpage \subsection{Norm plots of weights (AGC + PGT) of non-BN ResNet-18}
+\begin{figure}[h] \centering \includegraphics[width=0.55\textwidth]{agc_pgt-w_norm}
+\caption{ Method: AGC + PGT, batch size = 256. This is a plot depicting the
+iteration-wise evolution of the norm of each filter in each layer. Each subplot
 corresponds to a layer of the unnormalized ResNet-18. Above each subplot, the layer
 indices are shown. Each filter in each subplot is shown with a separate and randomly
 determined colour. } \end{figure}
@@ -1561,7 +1628,18 @@ layer represents a convolutional layer, with the layer index and the number of f
 denoted alongside it. Downsampling convolutional layers in skip connections are drawn
 and their layer indices are shown on the skip connection paths.
 
-\ \\ \ \\ \ \\ \ \\ \ \\ 
+
+ResNet-18 is composed of $20$ convolutional layers and one fully connected (FC) layer.
+At the input, it has a single convolutional layer with filters of size $7\times 7$.
+Three convolutional layers are placed in the downsampling skip connections. The
+remaining convolutional layers have several $3\times 3$ filters that are grouped
+together to create a block. Each basic block is connected by a skip connection. At the
+end of all convolutional layers, a global average pooling layer downsamples the features
+to a fixed-size feature vector and transfers it to the FC layer, which fits the features
+using regression and outputs logits. The logits $z_i$ produced by the FC layer are fed
+into a softmax layer, which transforms them to predicted probabilities $p_i$ using the
+equation $p_i=\frac {e^{z_i}}{\sum _j e^{z_j}}$.
+
 
 \begin{figure}[h] \centering \includegraphics[width=0.96\columnwidth]{drawing} \caption{
 ResNet-18 architecture with layer indices of convolutional layers and the number of
