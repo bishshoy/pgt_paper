@@ -15,10 +15,7 @@
 \usepackage{pifont}
 \usepackage{graphicx}
 
-% \usepackage{xcolor}
-% \usepackage{pagecolor}
-% \pagecolor{black}
-% \color{white}
+% \usepackage{xcolor} \usepackage{pagecolor} \pagecolor{black} \color{white}
 
 \graphicspath{{images/}}
 
@@ -983,7 +980,7 @@ incorrect class logits increases due to PGT and this leads to better class separ
 of batch-normalized variants: \textbf{(a)} ResNet-18 ($\alpha=0.25$), \textbf{(b)}
 ResNet-50 ($\alpha=0.3$). For better visualization of accuracies obtained in the final
 iterations, we plot both axes in log scale. PowerGrad Transform improves upon the
-baseline in all cases. The corresponding accuracies are mentioned in table
+baseline in all cases. The corresponding accuracies are mentioned in Table
 \ref{tab:imagenet_table}. \textbf{(c)} Training speed comparison between PGT ($60$
 epochs) and baseline ($100$ epochs). They both converge to the same test accuracy
 ($76.5\%$) on ImageNet-1K. PGT's accelerated training saves $40\%$ of the epoch budget.
@@ -1014,37 +1011,44 @@ baselines as compared to shallow networks like ResNet-18. }
 \multirow{2}{*}{SE-ResNet-50} & \multirow{2}{*}{Cosine} & Baseline & - & 81.5 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.97}}} & 77.218 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.734}}} \\
-& & PGT & 0.3 & \textcolor{red}{\textbf{82.47}} & & \textcolor{blue}{\textbf{77.952}} & \\
+& & PGT & 0.3 & \textcolor{red}{\textbf{82.47}} & & \textcolor{blue}{\textbf{77.952}} &
+\\
 \midrule
 \multirow{2}{*}{ResNet-50} & \multirow{2}{*}{Cosine} & Baseline & - & 79.18 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.5}}} & 76.56 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.656}}} \\
-& & PGT & 0.05 & \textcolor{red}{\textbf{79.68}} & & \textcolor{blue}{\textbf{77.216}} & \\
+& & PGT & 0.05 & \textcolor{red}{\textbf{79.68}} & & \textcolor{blue}{\textbf{77.216}} &
+\\
 \midrule
 \multirow{2}{*}{ResNet-50} & \multirow{2}{*}{Step} & Baseline & - & 78.99 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.57}}} & 75.97 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.524}}} \\
-& & PGT & 0.05 & \textcolor{red}{\textbf{79.56}} & & \textcolor{blue}{\textbf{76.494}} & \\
+& & PGT & 0.05 & \textcolor{red}{\textbf{79.56}} & & \textcolor{blue}{\textbf{76.494}} &
+\\
 \midrule
 \multirow{2}{*}{ResNet-101} & \multirow{2}{*}{Cosine} & Baseline & - & 82.29 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.81}}} & 77.896 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.362}}} \\
-& & PGT & 0.3 & \textcolor{red}{\textbf{83.1}} & & \textcolor{blue}{\textbf{78.258}} & \\
+& & PGT & 0.3 & \textcolor{red}{\textbf{83.1}} & & \textcolor{blue}{\textbf{78.258}} &
+\\
 \midrule
 \multirow{2}{*}{SE-ResNet-18} & \multirow{2}{*}{Cosine} & Baseline & - & 71.42 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.18}}} & 71.09 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.346}}} \\
-& & PGT & 0.25 & \textcolor{red}{\textbf{71.6}} & & \textcolor{blue}{\textbf{71.436}} & \\
+& & PGT & 0.25 & \textcolor{red}{\textbf{71.6}} & & \textcolor{blue}{\textbf{71.436}} &
+\\
 \midrule
 \multirow{2}{*}{ResNet-18} & \multirow{2}{*}{Step} & Baseline & - & 69.95 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.35}}} & 69.704 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.14}}} \\
-& & PGT & 0.25 & \textcolor{red}{\textbf{70.3}} & & \textcolor{blue}{\textbf{69.844}} & \\
+& & PGT & 0.25 & \textcolor{red}{\textbf{70.3}} & & \textcolor{blue}{\textbf{69.844}} &
+\\
 \midrule
 \multirow{2}{*}{ResNet-18} & \multirow{2}{*}{Cosine} & Baseline & - & 70.38 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.15}}} & 70.208 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.09}}} \\
-& & PGT & 0.25 & \textcolor{red}{\textbf{70.53}} & & \textcolor{blue}{\textbf{70.298}} & \\
+& & PGT & 0.25 & \textcolor{red}{\textbf{70.53}} & & \textcolor{blue}{\textbf{70.298}} &
+\\
 \end{tabular}
 \end{table}
 
@@ -1061,7 +1065,7 @@ In our studies, we employ either a step scheduler (dividing the learning rate by
 the $30^{th}$, $60^{th}$, and $90^{th}$ epochs) or a cosine decay scheduler
 \cite{loshchilov2016sgdr}. We find $\alpha=0.25$ and $\alpha=0.05$ to be good choices
 for ResNet-18 and ResNet-50, though larger values such as $\alpha=0.3$ also have good
-performance as well. The experimental results are shown in table
+performance as well. The experimental results are shown in Table
 \ref{tab:imagenet_table}, and we mention the value of the PGT hyperparmeter ($\alpha$)
 in each experiment. We explore different values of $\alpha$ in section \ref{sec:Abla}
 and provide detailed grid plots in the supplementary section.
@@ -1073,22 +1077,22 @@ and provide detailed grid plots in the supplementary section.
 
 In our experiments with Squeeze-and-Excitation variant of ResNet-50 i.e.
 SE-ResNet-50\cite{hu2018squeeze}, we observe significant improvements; a $0.97\%$ boost
-in training accuracy and a $0.734\%$ increase in test accuracy. Therefore, PGT also
-speeds up training. In our experiments with ResNet-50, we find an increase of $0.5\%$
-and $0.656\%$ performance enhancement over the baseline while using the cosine
-scheduler. The corresponding improvement over the step scheduler baseline for ResNet-50
-is $0.57\%$ and $0.524\%$ respectively for training and testing. ResNet-101 sees a
-higher improvement in training fit, $0.81\%$ to be exact, while the improvement over the
-test set is $0.362\%$. Smaller networks such as SE-ResNet-18 and ResNet-18 sees accuracy
-boosts which are smaller but nevertheless positive. Therefore we conclude that with PGT,
-the consistent improvements in training accuracies across all cases is because the
-networks train better and arrive at better optimas during convergence. Per epoch
-training and test accuracy plots of ResNet-18 and ResNet-50 (both with and without PGT)
-are shown in Fig. \ref{fig:metrics}(a, b). For better visualization of the top end of
-the plots, we scale both axes in log scale. Our experiments with batch-normalized
-networks indicate that PowerGrad Transform speeds up training and allows the network to
-learn better representations\footnote{Reproducible code, training recipes for the
-experiments, pretrained checkpoints and training logs are provided at: \\
+in training accuracy and a $0.734\%$ increase in test accuracy. In our experiments with
+ResNet-50, we find an increase of $0.5\%$ and $0.656\%$ performance enhancement over the
+cosine scheduler baseline for training and testing respectively. The corresponding
+improvement over the step scheduler baseline for ResNet-50 is $0.57\%$ (training) and
+$0.524\%$ (testing). ResNet-101 sees a higher improvement in training fit, $0.81\%$ to
+be exact, while the improvement over the test set is $0.362\%$. Smaller networks such as
+SE-ResNet-18 and ResNet-18 sees accuracy boosts which are smaller but nevertheless
+positive. Therefore we conclude that with PGT, the consistent improvements in training
+accuracies across all cases is because the networks train better and arrive at better
+optimas during convergence. Per epoch training and test accuracy plots of ResNet-18 and
+ResNet-50 (both with and without PGT) are shown in Fig. \ref{fig:metrics}(a, b). For
+better visualization of the top end of the plots, we scale both axes in log scale.
+Because both training and test accuracies improve, it indicates that PowerGrad Transform
+allows the network to learn better representations\footnote{Reproducible code, training
+recipes for the experiments, pretrained checkpoints and training logs are provided at:
+\\
 \url{ https://github.com/bishshoy/power-grad-transform }. Code is adapted from
 \cite{rw2019timm}.}.
 
@@ -1098,9 +1102,10 @@ the baseline model. Alternatively, practitioners can apply PGT and have the netw
 converge to accuracy levels comparable to the baseline with a significantly reduced
 epoch budget. In Fig. \ref{fig:metrics}(c), we illustrate one such instance in which we
 train a ResNet-50 to its cosine scheduler baseline in just $60$ epochs with PGT, and
-match its baseline performance that is acquired in $100$ epochs. Because of the
-acceleration in training that is made possible by PGT, the total amount of training time
-can be decreased by $40\%$.
+match its baseline performance that is acquired in $100$ epochs. This hints to the
+observation that PGT not only makes the network perform better but also speeds up
+training. Because of the acceleration in training that is made possible by PGT, the
+total amount of training time can be decreased by $40\%$.
 
 
 
@@ -1323,14 +1328,14 @@ layers to the fully connected stage for regression.
 
 AGC is excellent at eliminating the issue of filter and feature zeroing out. However,
 AGC recovers a lower performance benefit than PGT. In the instance of PGT, we see that
-it also mitigates the zeroing out phenomenon in most layers. In
-Fig.\ref{fig:agc_pgt}(a), we see a plot of the $15^\textit{th}$ layer of the non-BN
+it also mitigates the zeroing out phenomenon in most layers. In Fig.
+\ref{fig:agc_pgt}(a), we see a plot of the $15^\textit{th}$ layer of the non-BN
 ResNet-18 trained without PGT. As we can see that there has been quite a few filter
 dropouts in the baseline. PGT recovers most of the filters [Fig. \ref{fig:agc_pgt}(b)].
 In some layers however, the performance of PGT is slightly weaker than the baseline. The
 $2^\textit{nd}$ convolutional layer has more zeroed out filters in PGT [Fig.
 \ref{fig:agc_pgt}(e)] than in the baseline [Fig. \ref{fig:agc_pgt}(d)]. Despite that,
-PGT achieves a higher overall accuracy (table \ref{tab:wobn_table}). This necessitates
+PGT achieves a higher overall accuracy (Table \ref{tab:wobn_table}). This necessitates
 the simultaneous use of AGC and PGT, for the non-BN ResNet-18.
 
 
@@ -1361,19 +1366,20 @@ ResNet-18 (non-BN) & 1024 & Baseline & - & 66.27 & - & 64.816 & - \\
 \textcolor{olive}{\textbf{+0.682}} \\
 \cmidrule{2-8}
 & 512 & Baseline & - & 68.02 & - & 66.552 & - \\
-& 512 & PGT & 0.25 & \textcolor{red}{\textbf{69.5}} & \textcolor{olive}{\textbf{+1.48}} &
-\textcolor{blue}{\textbf{67.236}} & \textcolor{olive}{\textbf{+0.684}} \\
+& 512 & PGT & 0.25 & \textcolor{red}{\textbf{69.5}} & \textcolor{olive}{\textbf{+1.48}}
+& \textcolor{blue}{\textbf{67.236}} & \textcolor{olive}{\textbf{+0.684}} \\
 \cmidrule{2-8}
 & 256 & Baseline & - & 68.86 & - & 66.796 & - \\
 & 256 & GC & - & 69.04 & +0.18 & 67.064 & +0.268 \\
 & 256 & AGC & - & 69.06 & +0.2 & 67.298 & +0.502 \\
-& 256 & PGT & 0.25 & \textcolor{red}{\textbf{69.97}} & \textcolor{olive}{\textbf{+1.11}} &
-\textcolor{blue}{\textbf{67.814}} & \textcolor{olive}{\textbf{+1.018}} \\
+& 256 & PGT & 0.25 & \textcolor{red}{\textbf{69.97}} & \textcolor{olive}{\textbf{+1.11}}
+& \textcolor{blue}{\textbf{67.814}} & \textcolor{olive}{\textbf{+1.018}} \\
 \cmidrule{2-8}
 & 256 & Baseline & - & 68.86 & - & 66.796 & - \\
 & 256 & GC+PGT & 0.25 & 68.67 & -0.19 & 67.088 & +0.292 \\
-& 256 & AGC+PGT & 0.25 & \textcolor{red}{\textbf{70.92}} & \textcolor{olive}{\textbf{+2.06}} &
-\textcolor{blue}{\textbf{68.856}} & \textcolor{olive}{\textbf{+2.06}} \\
+& 256 & AGC+PGT & 0.25 & \textcolor{red}{\textbf{70.92}} &
+\textcolor{olive}{\textbf{+2.06}} & \textcolor{blue}{\textbf{68.856}} &
+\textcolor{olive}{\textbf{+2.06}} \\
 \end{tabular}
 \end{table}
 
@@ -1393,21 +1399,19 @@ inferior to baselines for other batch sizes. PGT helps regain some of the lost
 performance by $0.682\%$ ($65.498\%$ vs. $64.816\%$). This illustrates that in
 unnormalized networks, accuracy suffers significantly when batch sizes are large.
 Additionally, the training process is often unstable at this batch size, resulting in
-filters and sometimes entire layers frequently zeroing out (as seen in \ref{sec:Empi}).
-At a batch size of 512, invoking PGT improves the training accuracy baseline by $1.48\%$
-and the test accuracy baseline by $0.684\%$, while at a batch size of 256, the
-improvement in training and test accuracies are $1.11\%$ and $1.018\%$ respectively. In
-comparison, the test accuracy improvements obtained by GC and AGC at batch size of 256
-is much less, at $0.27\%$ and $0.5\%$, respectively.
+filters and sometimes entire layers frequently zeroing out (as seen in section
+\ref{sec:Empi}). At a batch size of 512, invoking PGT improves the training accuracy
+baseline by $1.48\%$ and the test accuracy baseline by $0.684\%$, while at a batch size
+of 256, the improvement in training and test accuracies are $1.11\%$ and $1.018\%$
+respectively. In comparison, the test accuracy improvements obtained by GC and AGC at
+batch size of 256 is much less, at $0.27\%$ and $0.5\%$, respectively.
 
 On the training accuracy front, since we get a significant boost ($1.48\%$ at batch size
 of 512 and $1.11\%$ at batch size of 256), it leads us to infer that when PowerGrad
 Transform is used, the network fits the training dataset more tightly and the
 convergence optima is significantly superior. We also notice that the training versus
 testing gap increases with PGT as compared to the gap at baseline even though both
-training and test performance is improved. This allows us to infer that PGT increases
-the generalization gap between the training and the test set, despite improvements in
-both training and test performance. Therefore it allows us to conclude that the
+training and test accuracies improve. Therefore it allows us to conclude that the
 improvements in training and test accuracies are obtained not through regularization
 like it does in methods such as label smoothing; rather the improvements are obtained as
 PGT enables the network to utilize its learning capacity better and arrive at a higher
@@ -1472,13 +1476,18 @@ PGT reshapes the predicted probability distribution. It redistributes probabilit
 the confident classes to the less confident ones. Gradient rises in all classes. We also
 see that the final value of the loss rises as $\alpha$ drops, and that the logit norm
 and the final value of the loss are linearly correlated Fig. \ref{fig:stats}(c). What is
-surprising is that: \textit{greater accuracies may be acquired at larger loss values at
-convergence}. This is markedly different from the coupled gradient descent based
-training procedures. PGT enables the network to arrive at such optima where the loss
-values are high, but both training and test perfomance is better. From these plots of
-logits and losses we find that with the inclusion of PGT in the training process, the
-model can have access to such regions of the loss landscape that is otherwise
-inaccessible to traditional gradient based training procedures.
+surprising is that: \textit{it is possible to achieve higher accuracies even though the
+loss values are larger during convergence}. In our studies with ResNet-50, for instance,
+if PGT is not invoked, the corresponding test accuracy is $76.56\%$ (Table
+\ref{tab:imagenet_table}) with a cross-entropy loss value of $0.852$. However, if PGT is
+activated with $\alpha=0.05$, the corresponding test accuracy is $77.216\%$ (Table
+\ref{tab:imagenet_table}) with a loss value of $2.360$. This is markedly different from
+the coupled gradient descent based training procedures. PGT enables the network to
+arrive at such optima where the loss values are high, but both training and test
+perfomance is better. From these plots of logits and losses we find that with the
+inclusion of PGT in the training process, the model can have access to such regions of
+the loss landscape that is otherwise inaccessible to traditional gradient based training
+procedures.
 
 
 
@@ -1497,23 +1506,24 @@ smoothing has been applied. A smoothing hyperparameter value of $0.1$ has been u
 hyperparameter column that controls the amount of PGT gradient modification injected at
 softmax, Eq. \ref{transformed_probabilities}. }
 \label{tab:ablation_table}
-\begin{tabular}{ccccccc}
-\multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Scheduler}} & \textbf{Label} &
-\textbf{PowerGrad} & \textbf{Train} & \textbf{Test} & \multirow{2}{*}{\textbf{Gap}} \\
-& & \textbf{Smoothing} & \textbf{Transform ($\alpha$)} & \textbf{Accuracy (\%)} &
+\begin{tabular}{cccccccc}
+\multirow{2}{*}{\textbf{\#Row}} & \multirow{2}{*}{\textbf{Model}} &
+\multirow{2}{*}{\textbf{Scheduler}} & \textbf{Label} & \textbf{PowerGrad} &
+\textbf{Train} & \textbf{Test} & \multirow{2}{*}{\textbf{Gap (\%)}} \\
+& & & \textbf{Smoothing} & \textbf{Transform ($\alpha$)} & \textbf{Accuracy (\%)} &
 \textbf{Accuracy (\%)} & \\
 \midrule
-ResNet-50 & Step & \xmark & \xmark & 78.99 & 75.97 & 3.02 \\
-& Step & \xmark & 0.3 & 79.56 & 76.494 & 3.066 \\
-\cmidrule{2-7}
-& Cosine & \xmark & \xmark & 79.18 & 76.56 & 2.62 \\
-& Cosine & 0.1 & \xmark & 78.81 & 76.698 & 2.112 \\
-\cmidrule{2-7}
-& Cosine & \xmark & 0.3 & 79.43 & 76.886 & 2.544 \\
-& Cosine & 0.1 & 0.3 & 78.47 & 76.968 & 1.502 \\
-\cmidrule{2-7}
-& Cosine & \xmark & 0.05 & 79.68 & 77.216 & 2.464 \\
-& Cosine & 0.1 & 0.05 & 77.69 & 76.39 & 1.3 \\
+1. & ResNet-50 & Step & \xmark & \xmark & 78.99 & 75.97 & 3.02 \\
+2. & ResNet-50 & Step & \xmark & 0.3 & 79.56 & 76.494 & 3.066 \\
+\cmidrule{2-8}
+3. & ResNet-50 & Cosine & \xmark & \xmark & 79.18 & 76.56 & 2.62 \\
+4. & ResNet-50 & Cosine & 0.1 & \xmark & 78.81 & 76.698 & 2.112 \\
+\cmidrule{2-8}
+5. & ResNet-50 & Cosine & \xmark & 0.3 & 79.43 & 76.886 & 2.544 \\
+6. & ResNet-50 & Cosine & 0.1 & 0.3 & 78.47 & 76.968 & 1.502 \\
+\cmidrule{2-8}
+7. & ResNet-50 & Cosine & \xmark & 0.05 & 79.68 & 77.216 & 2.464 \\
+8. & ResNet-50 & Cosine & 0.1 & 0.05 & 77.69 & 76.39 & 1.3 \\
 \end{tabular}
 \end{table}
 
@@ -1526,25 +1536,27 @@ supplementary section. We have previously demonstrated from the experiments depi
 section \ref{sec:Expe}, that PowerGrad Transform causes the network to arrive at a
 better optima and fit the training dataset better than the baseline. In this ablation
 study, we use the ResNet-50 architecture and we combine our proposed method with other
-regularization techniques such as label smoothing and report our findings in table
+regularization techniques such as label smoothing and report our findings in Table
 \ref{tab:ablation_table}. We also investigate the two optimal peaks of the
 hyperparameter ($\alpha$) obtained from ResNet-50's grid search ($\alpha=0.05$ and
 $\alpha=0.3$). First, we examine the effect of PGT on the step scheduler baseline in
-order to later compare it to the cosine scheduler baseline. PGT improves upon the step
+order to later compare it to the cosine scheduler baseline. \textbf{Row-1)} We begin
+with the step scheduler baseline ($75.97\%$). \textbf{Row-2)} PGT improves upon the step
 scheduler baseline (test set) by a substantial margin with $0.524\%$ ($76.494\%$ as
-opposed to $75.97\%$). Introducing the cosine scheduler yields a $0.59\%$ improvement
-($76.56\%$ vs. $75.97\%$) over the step scheduler. After introducing label smoothing,
-the test accuracy relative to the cosine scheduler baseline increases by only $0.138\%$
-(from $76.56\%$ to $76.698\%$). However, introducing PGT with $\alpha=0.3$ alone
-(without label smoothing) improves the cosine scheduler baseline by $0.326\%$
-($76.886\%$ vs. $76.56\%$). Combining PGT ($\alpha=0.3$) with label smoothing improves
-the performance on the test set further by $0.408\%$ (from $76.56\%$ to $76.968\%$) and
-reduces the generalization gap (from $2.54\%$ to $1.5\%$). However, the impact of
-combining PGT with label smoothing can vary depending on the value of the hyperparameter
-$\alpha$. With a PGT hyperparameter value of $\alpha=0.05$, we notice the greatest
+opposed to $75.97\%$). \textbf{Row-3)} Introducing the cosine scheduler yields a
+$0.59\%$ improvement ($76.56\%$ vs. $75.97\%$) over the step scheduler. \textbf{Row-4)}
+After introducing label smoothing, the test accuracy relative to the cosine scheduler
+baseline increases by only $0.138\%$ (from $76.56\%$ to $76.698\%$). \textbf{Row-5)}
+However, introducing PGT with $\alpha=0.3$ alone (without label smoothing) improves the
+cosine scheduler baseline by $0.326\%$ ($76.886\%$ vs. $76.56\%$). \textbf{Row-6)}
+Combining PGT ($\alpha=0.3$) with label smoothing improves the performance on the test
+set further by $0.408\%$ (from $76.56\%$ to $76.968\%$) and reduces the generalization
+gap (from $2.54\%$ to $1.5\%$). However, the impact of combining PGT with label
+smoothing can vary depending on the value of the hyperparameter ($\alpha$).
+\textbf{Row-7)} With a PGT hyperparameter value of $\alpha=0.05$, we notice the greatest
 performance improvement, $1.246\%$ over the step scheduler test baseline and $0.656\%$
-over the cosine scheduler test baseline. Adding label smoothing to PGT ($\alpha=0.05$)
-hurts performance even though it reduces the generalization gap.
+over the cosine scheduler test baseline. \textbf{Row-8)} Adding label smoothing to PGT
+($\alpha=0.05$) hurts performance even though it reduces the generalization gap.
 
 
 
@@ -1632,12 +1644,16 @@ CIFAR-10 dataset. Each datapoint is collected over a 360 epoch budget. }
 \label{fig:grid_searchc}
 \end{figure}
 
+
+There is no effect of PGT on small datasets such as CIFAR-10. In these scenarios,
+networks almost always achieve $100\%$ training accuracy, leaving no room for PGT to
+assist.
+
 \clearpage
 
 
 
-\subsection{Norm plots of weights (baseline (low batch size)) of non-BN
-ResNet-18}
+\subsection{Norm plots of weights (baseline (low batch size)) of non-BN ResNet-18}
 \begin{figure}[ht] \centering \includegraphics[width=0.55\textwidth]{baseline-w_norm}
 \caption{ Method: baseline, batch size = 256. This is a plot depicting the
 iteration-wise evolution of the norm of each filter in each layer. Each subplot
@@ -1648,8 +1664,7 @@ determined colour. } \end{figure}
 \clearpage
 
 
-\subsection{Norm plots of weights (baseline (high batch size)) of non-BN
-ResNet-18}
+\subsection{Norm plots of weights (baseline (high batch size)) of non-BN ResNet-18}
 \begin{figure}[ht] \centering
 \includegraphics[width=0.55\textwidth]{baseline_high_bs-w_norm} \caption{ Method:
 baseline (high batch size), batch size = 1024. This is a plot depicting the
@@ -1707,9 +1722,9 @@ into a softmax layer, which transforms them to predicted probabilities $p_i$ usi
 equation $p_i=\frac {e^{z_i}}{\sum _j e^{z_j}}$.
 
 
-\begin{figure}[ht] \centering \includegraphics[width=0.96\columnwidth]{drawing} \caption{
-ResNet-18 architecture with layer indices of convolutional layers and the number of
-filters in each layer. } \label{fig:resnet18} \end{figure}
+\begin{figure}[ht] \centering \includegraphics[width=0.96\columnwidth]{drawing}
+\caption{ ResNet-18 architecture with layer indices of convolutional layers and the
+number of filters in each layer. } \label{fig:resnet18} \end{figure}
 
 
 
