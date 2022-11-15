@@ -10,7 +10,6 @@
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{booktabs}
-% \usepackage{amsthm}
 \usepackage{pifont}
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -40,7 +39,7 @@ tabsize=2 }
 
 \begin{document}
 \title{Altering Backward Pass Gradients to improve Convergence}
-\author{Bishshoy Das\inst{1}\orcidID{0000-0002-6525-4015}\and Milton Mondal\inst{1}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Brejesh Lall\inst{3}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Shiv Dutt Joshi\inst{3}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Sumantra Dutta Roy\inst{3}\orcidID{xxxx-xxxx-xxxx-xxxx}}
+\author{Bishshoy Das\inst{1}\orcidID{0000-0002-6525-4015}\and Milton Mondal\inst{1}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Brejesh Lall\inst{3}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Shiv Dutt Joshi\inst{3}\orcidID{0000-0002-0326-0524}\and Sumantra Dutta Roy\inst{3}\orcidID{0000-0002-2141-5067}}
 \authorrunning{B. Das et al.}
 \institute{Indian Institute of Technology Delhi, New Delhi - 110016, India \\ \email{\{bishshoy.das, milton.mondal, brejesh, sdjoshi, sumantra\}@ee.iitd.ac.in}}
 \maketitle
@@ -455,7 +454,7 @@ improve the performance. We use the same setup as described in section \ref{sec:
 To explore the properties of PGT, we start by investigating the effect of the transform
 on the softmax probabilities.
 
-\subsection{Properties of PGT}
+\subsection{Properties}
 \label{sec:pgt_prop}
 
 \textbf{Lemma 1.} For any arbitrary probability distribution $P$ with probability values
@@ -469,14 +468,6 @@ p_i' < p_i & \text{,\ \ if } p_i > \Big(\sum _{j=1}^C
 p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}} \end{split} \label{eqn:threshold}
 \end{equation}
 
-\textit{Proof.} The proof follows directly from the definition of $p_i'$. We notice that
-if $p_i' < p_i$, we get:
-
-\begin{proof} \begin{alignat}{2} &\ \ \frac{p_i^{\alpha }}{\sum
-_{j=1}^C p_j^{\alpha}} < p_i \\ \Rightarrow &\ p_i^{\alpha -1}<\sum _{j=1}^C p_j^{\alpha
-} \\ \Rightarrow &\ p_i > \Big(\sum _{j=1}^C p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}}
-\end{alignat} \end{proof}
-
 We call this threshold, the \textit{stationary threshold}. The stationary threshold is
 that value of $p_i$ that does not change after the transformation. Therefore, when $p_i$
 is greater than the \textit{stationary threshold}, $p_i' < p_i$.
@@ -487,18 +478,12 @@ is greater than the \textit{stationary threshold}, $p_i' < p_i$.
 values of the transformed distribution $p_i'$ reduces reduces to the uniform
 distribution for $i=1,\dots,C$,.
 
-\textit{Proof.} From Eq. (\ref{eqn:threshold}), we see that the stationary threshold at
-$\alpha=0$ is $1/C$. Also, following from the definition of the transformed
-probabilities (Eq. \ref{transformed_probabilities}) we conclude that if $\alpha=0$, then
-all values of $p_i'$ are $1/C$. Therefore the transformed distribution at $\alpha=0$ is
-a uniform distribution.
-
-Since we have established that values of $p_i$ which are greater than the stationary
-threshold decreases and move down towards the stationary threshold, and values in $p_i$
-lower than the stationary threshold moves up towards the stationary threshold, this
+We have established that values of $p_i$ which are greater than the stationary threshold
+decreases and move down towards the stationary threshold, and values in $p_i$ lower than
+the stationary threshold moves up towards the stationary threshold. Therefore, this
 transformation makes the distribution more uniform (i.e. it smooths out the actual
 distribution) as $\alpha$ is decreased from $1$ and down towards $0$. This final
-observation we prove in the following theorem.
+observation in the following theorem.
 
 
 
@@ -506,53 +491,6 @@ observation we prove in the following theorem.
 values $p_i$ for $i=1,\dots,C$, the stationary threshold of the transformed distribution
 $P'$ with probability values $p_i'=\frac{p_i^{\alpha}}{\sum _{j=1}^C p_j^\alpha}, 0 \leq
 \alpha \leq 1$ is a monotonically non-decreasing function with respect to $\alpha$.
-
-\textit{Proof.} To prove monotonicity, we first compute the gradient of the stationary
-threshold with respect to the variable in concern, $\alpha$.
-
-\begin{alignat}{2} & \frac{\partial }{\partial \alpha} \left(\sum _{j=1}^c
-p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}}\ \ = \left(\sum _{j=1}^c
-p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}} \left(\frac{\sum _{j=1}^c p_j^{\alpha } \log
-\left(p_j\right)}{(\alpha -1) \sum _{j=1}^c p_j^{\alpha}}-\frac{\log \left(\sum _{j=1}^c
-p_j^{\alpha}\right)}{(\alpha -1)^2}\right) \\
-& = \frac{1}{\alpha  (\alpha -1)^2} \left(\sum _{j=1}^c p_j^{\alpha
-}\right){}^{\frac{1}{\alpha -1}} \left(\frac{(\alpha -1) \sum _{j=1}^C p_j^{\alpha }
-\log \left(p_j^{\alpha}\right)}{\sum _{j=1}^c p_j^{\alpha }}-\alpha \log \left(\sum
-_{j=1}^c p_j^{\alpha }\right)\right) \label{derivative} \end{alignat}
-
-If $a_1,\dots ,a_n$ and $b_1,\dots ,b_n$ are non-negative numbers, then using the log
-sum inequality, \\ we get $\sum _{j=1}^n a_j \log \left(\frac{a_j}{b_j}\right)\geq
-\left(\sum _{j=1}^n a_j\right) \log \left(\frac{\sum _{j=1}^n a_j}{\sum _{j=1}^n
-b_j}\right)$. Setting $a_j=p_j^\alpha$ and $b_j=1$, we get the following lower bound
-\begin{equation} \sum _{j=1}^C p_j^{\alpha } \log
-\left(p_j^{\alpha }\right)\geq \left(\sum _{j=1}^C
-p_j^{\alpha}\right) \log \left(\frac{1}{C} \sum _{j=1}^C
-p_j^{\alpha}\right) \label{lower_bound1} \end{equation}
-
-Substituting (\ref{lower_bound1}) in (\ref{derivative}), we get:
-
-\begin{equation} \frac{\partial }{\partial \alpha} \left(\sum
-_{j=1}^c p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}}\ \ \geq
-\frac{1}{\alpha  (\alpha -1)^2} \left(\sum _{j=1}^c
-p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}} \left((1-\alpha )
-\log (C)-\log \left(\sum _{j=1}^C p_j^{\alpha }\right)\right)
-\label{lb_subs} \end{equation}
-
-$p^{\alpha}$ is concave, and so by Jensen's inequality we get the following upper bound
-for the second term:
-
-\begin{equation} \left(\frac{1}{C}{\sum _{j=1}^C
-p_j}{}\right){}^{\alpha }\ \ \geq\ \ \frac{1}{C}{\sum _{j=1}^C
-p_j^{\alpha }}{} \end{equation}
-
-\begin{equation}\Rightarrow\ \ \log \left(\sum _{j=1}^C p_j^{\alpha}\right)\leq
-(1-\alpha ) \log (C) \label{upper_bound} \end{equation}
-
-Substituting (\ref{upper_bound}) in (\ref{lb_subs}),
-
-\begin{proof} \begin{equation} \frac{\partial}{\partial \alpha
-}\left(\sum _{j=1}^c p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}}\ \ \geq \ \ 0
-\end{equation} \end{proof}
 
 
 
@@ -571,198 +509,18 @@ the original distribution.
 
 
 
+\subsection{Effects of PGT on logit, weight gradients and class separation}
 
+PGT, other than having the properties mentioned above, also:
+\begin{enumerate}
+\item restricts the magnitude of the directional derivative for each logit from becoming too small or too high
+\item enhances gradient behavior of weights in a manner that improves learning
+\item leads to better class separation.
+\end{enumerate}
 
-\subsection{PGT restricts the partial derivative of the loss w.r.t. each logit from becoming too small or too high}
-\label{sec:pgt_logit_derivative}
-
-We know that neural networks uses the softmax function to generate prediction
-probabilities from logits in multi-class classification tasks. If we use cross-entropy
-loss to train the network then the partial derivative of the loss w.r.t. $i^{th}$ logit
-is dependent on the value of the predicted probability and the value of the class label
-(either 0 or 1) of the $i^{th}$ logit. 
-
-\begin{equation}
-\label{actual_logit_derivative}
-\frac{\partial L}{\partial z_i} = p_i -q_i
-\end{equation}
-In general, the range of the $|\frac{\partial L}{\partial z_i}|$ is [$\delta$,
-$\epsilon$] where, $\delta\rightarrow 0$ and $\epsilon\rightarrow 1$ in traditional
-training (Eq. \ref{actual_logit_derivative} procedures of neural networks. Here, we
-propose a new method of neural network training which alters the gradients at the time
-of backward pass by modifying the predicted probability vector using PGT (Eq.
-\ref{PGT_logit_derivative}) such that the directional derivative for each logit does not
-become too small or too large,
-
-
-With inclusion of PGT in the last layer, the range of the $\widehat{|\frac{\partial
-L}{\partial z_i}|}$ becomes [$\delta^+$, $\epsilon^-$] where, $\delta^+>\delta$ and
-$\epsilon^-<\epsilon$
-
-
-Now, we demonstrate how PGT restricts the magnitude of the directional derivative for
-each logit. For a training example, a neural network can assign the highest probability
-to either (i) a wrong class or to the (ii) correct class. 
-
-\textbf{(i) Wrong Class Predicted:}
-If the network assigns the highest probability for any class except the the true class,
-then wrong class assignment happens. We analyze the effect on gradient due to PGT for
-this case. There are three possibilities
-
-(a) Let, $i^{th}$ class be the class for which the network assigns low probability, but
-it is the true class, then
-
-$p_i < p_{th} \Rightarrow p'_i > p_i \Rightarrow \widehat{\frac{\partial L}{\partial
-z_i}} = p'_i -1 >  p_i -1 $ ; where $p_i\rightarrow 0$ \& $q_i = 1$
-
-So; $|\widehat{\frac{\partial L}{\partial z_i}}| = |p'_i -1| <  |p_i -1| \Rightarrow
-|\widehat{\frac{\partial L}{\partial z_i}}| <\epsilon $ where; $\epsilon\rightarrow 1$
-
-(b) Let, $j^{th}$ class be the class (not true class) for which the network assigns the
-highest probability, then
-
-$p_j > p_{th} \Rightarrow p'_j < p_j \Rightarrow \widehat{\frac{\partial L}{\partial
-z_j}} = p'_j <  p_j$ ; where $p_j\rightarrow 1$ \& $q_j = 0$
-
-So, $|\widehat{\frac{\partial L}{\partial z_j}}| <\epsilon$ where; $\epsilon\rightarrow
-1$
-
-
-
-(c) Let $k$ denote the index for all those classes for which the predicted probability
-is low and also the ground truth class label is $0$, then
-
-$p_k < p_{th} \Rightarrow p'_k > p_k \Rightarrow \widehat{\frac{\partial L}{\partial
-z_k}} = p'_k >  p_k$ ; where $p_k\rightarrow 0$ \& $q_k = 0$
-
-So, $|\widehat{\frac{\partial L}{\partial z_k}}| >\delta$ where; $\delta\rightarrow$ 0
-
-\textbf{(ii) Correct Class Predicted:}
-For a given training example, if the network assigns the highest probability to the true
-class then it assigns correct class to the training example. Now we observe the effect
-on gradient due to PGT for this case. There are two possibilities,
-
-(a) Let, $i^{th}$ class be the class for which the network assigns the highest
-probability and it is also the true class, then
-
-$p_i > p_{th} \Rightarrow p'_i < p_i \Rightarrow \widehat{\frac{\partial L}{\partial
-z_i}} = p'_i -1 <  p_i -1 $ ; where $p_i\rightarrow 1$ \& $q_j = 1$
-
-So; $|\widehat{\frac{\partial L}{\partial z_i}}| = |p'_i -1| >  |p_i -1|  \Rightarrow
-|\widehat{\frac{\partial L}{\partial z_i}}| >\delta $ where; $\delta\rightarrow 0$
-
-(b) Let, $k^{th}$ index is used for all those classes for which the predicted
-probability is low and also the actual label value $0$, then
-
-$p_k < p_{th} \Rightarrow p'_k > p_k \Rightarrow \widehat{\frac{\partial L}{\partial
-z_k}} = p'_k >  p_k$ ; where $p_k\rightarrow 0$ \& $q_k = 0$
-
-So, $|\widehat{\frac{\partial L}{\partial z_k}}| >\delta$ where; $\delta\rightarrow 0$
-
-After analyzing all these cases ((i)a,b,c \& (ii)a,b), we are able to deduce that PGT
-helps to restrict the directional derivative to be within limit such that for every
-logit/direction the directional derivative is not very small or very large. 
-
-\subsection{Effect of PGT on weight gradients}
-\label{sec:pgt_weight_gradients}
-
-\begin{figure}[t]
-\centering
-\includegraphics[scale=1.0,width=0.5\columnwidth]{simplenn.jpg}
-\caption{Fully connected layer of a convolutional neural network} 
-\label{fig:simplenn}
-\end{figure} 
-
-
-
-
-In this section, we discuss the impact of PGT on weight gradients. Let the input and
-output of the last convolutional layer of a convolutional neural network be \textbf{x}
-and \textbf{a} respectively (Fig. \ref{fig:simplenn}). The last layer which is a fully
-connected layer, produces logits \textbf{z} by combining \textbf{a} with weights and
-thereafter the network generates the predicted probability vector \textbf{p} from the
-logits using softmax activation function. We note that a$_i \geq 0$ $ \forall i$  as,
-\textbf{a} is the output of ReLU activation functions.
-
-
-Here, $z_i = \sum_{j=1}^{C}w_{ij}a_j$, so $\frac{\partial L}{\partial w_{ij}} =
-a_j\frac{\partial L}{\partial z_{i}} $. However, if we apply PGT while training the
-neural network, then $\widehat{\frac{\partial L}{\partial w_{ij}}}
-=a_j\widehat{\frac{\partial L}{\partial z_i}}$
-
-If the activation of the $j^{th}$ neuron is zero, i.e. $a_j = 0$ then there is zero
-gradient for all weights which acts on $a_j$ both for normal training and training with
-PGT, as $a_j$ has no contribution in the computation of logits. However, the interesting
-thing is to observe the effect of PGT when $a_j > 0$. As, the activation values $(a_j)$
-are positive, so $ \widehat{\frac{\partial L}{\partial z_i}}  > \frac{\partial
-L}{\partial z_{i}} \Rightarrow$ $\widehat{\frac{\partial L}{\partial w_{ij}}} >
-\frac{\partial L}{\partial w_{ij}} \forall j \in (1,2,\ldots C)$ and similar
-relationship for $a_j < 0$. With PGT, the weight updating rule for $(t+1)^{th}$
-iteration then becomes,
-\begin{equation}
-\label{weight_update_PGT}
-w_{ij}^{t+1} = w_{ij}^{t} - \eta \widehat{\frac{\partial L}{\partial w_{ij}^{t}}}
-\end{equation}
-The weight update equation using PGT, can also be viewed in terms of the following
-equation,
-\begin{equation}
-\label{weight_update_final_PGT}
-w_{ij}^{t+1} = w_{ij}^{t} - \frac{\eta}{C_{PGT}} \frac{\partial L}{\partial w_{ij}^{t}}
-\end{equation}
-
-For neural networks, the exponential nature of the softmax function produces sharp
-distribution for predicted probability vector. For example, if \textbf{z} is $[20, 30,
-10]$ then \textbf{p} is equal to $[4\times 10^{-5},  0.99995, 2\times10^{-9}]$. When the
-network is at the initial phase of training, most of the training examples are
-misclassified. Under this scenario, PGT helps to update the weights in a better manner
-than traditional gradients. Suppose the label vector \textbf{q} is $[1, 0, 0]$ then it
-indicates that $z_1$ is the logit corresponding to ground truth class and $z_2$ is the
-logit where the network has assigned the highest probability. Similarly, $z_3$ is the
-logit where the network has assigned a low probability as well as the label vector is
-also $0$ for this logit. Here $\frac{\partial L}{\partial w_{1j}^{t}} = \epsilon a_j > 0
-\Rightarrow$ $ \widehat{\frac{\partial L}{\partial w_{1j}^{t}}} < \frac{\partial
-L}{\partial w_{1j}^{t}} \Rightarrow C_{PGT} > 1$ $\forall j \in (1, 2,\ldots C)$.
-Advanced gradient updation algorithms like AdaGrad \cite{duchi2011adaptive} reduces the
-gradient in the direction where the directional derivative for a weight is high. It
-reduces the learning rate for the weight so that the gradient in that direction is not
-too large in order to make the update process less volatile. The formulation of PGT also
-implicitly reduces the partial derivative in the same manner for the high derivative
-directions, the only difference with the AdaGrad is that $C_{PGT}$ depends only on the
-current iteration's gradient and not on previous iterations like AdaGrad. Similarly we
-can observe that for this example, $\frac{\partial L}{\partial w_{3j}^{t}} = \delta a_j
-\approx 0 \Rightarrow$ $  \widehat{\frac{\partial L}{\partial w_{3j}^{t}}} >
-\frac{\partial L}{\partial w_{3j}^{t}} \Rightarrow C_{PGT} < 1$ $\forall j \in (1,
-2,\ldots C)$. As directional derivative for the weights associated with third logit is
-extremely low, PGT helps to increase the derivative in these directions so that the
-training process does not become too slow.
-
-
-
-\subsection{Effect of PGT on class separation}
-\label{sec:pgt_class_separation}
-
-During final iterations of training, we analyze the iteration-wise gradient behaviour
-where the network assigns the highest probability to the correct class for a given
-training example; we deduce the effects of PGT in the next immediate training iteration.
-For example, if \textbf{z} is $[30, 20, 10]$ then \textbf{p} is $[0.99995, 4\times
-10^{-5}, 2\times10^{-9}]$ and \textbf{q} is $[1, 0, 0]$. There is no change in the
-weight update due to PGT when $a_j = 0$. However, when $i \neq 1$ and $a_j > 0$,
-$|\widehat{\frac{\partial L}{\partial w_{1j}^{t}}}| > |\frac{\partial L}{\partial
-w_{1j}^{t}}|$ and $\widehat{\frac{\partial L}{\partial w_{ij}^{t}}} > \frac{\partial
-L}{\partial w_{ij}^{t}}$. Here in this example $\frac{\partial L}{\partial z_{1}^{t}} <
-0 \Rightarrow \frac{\partial L}{\partial w_{1j}^{t}} < 0 \Rightarrow$
-$\widehat{w_{1j}^{t+1}} > w_{1j}^{t+1} > w_{1j}^{t} \forall j$. We also know that
-$z_i^{t+1} = \sum_{j=1}^{C}w_{ij}^{t+1}a_j$ and $\widehat{z_i^{t+1}} =
-\sum_{j=1}^{C}\widehat{w_{ij}^{t+1}}a_j$. It indicates that $\widehat{z_{1}^{t+1}} >
-z_{1}^{t+1} > z_{1}^{t}$ as all the weights associated with first logit is larger while
-using PGT in $(t+1)^{th}$ iteration. Similarly, for the non-true classes
-$\widehat{w_{ij}^{t+1}} < w_{ij}^{t+1} < w_{ij}^{t}$ when $i \neq 1$ $\forall j$ as
-$\frac{\partial L}{\partial z_{i}^{t}} > 0$. So in $(t+1)^{th}$ iteration,
-$\widehat{z_{i}^{t+1}} < z_{i}^{t+1} < z_{i}^{t}$ when $i \neq 1$. We observe that
-$dist(\widehat{z_{1}^{t+1}}, \widehat{z_{i}^{t+1}}) > $  $dist(z_{1}^{t+1},
-z_{i}^{t+1})$ where the first logit corresponds to the true class and all other logits
-indexed by $i$ are non-true classes. Therefore the distance between correct and
-incorrect class logits increases due to PGT and this leads to better class separation.
+We demonstrate each of these effects in detail in supplementary sections
+\ref{sec:pgt_logit_derivative}, \ref{sec:pgt_weight_gradients} and
+\ref{sec:pgt_class_separation} respectively.
 
 \section{Experiments}
 \label{sec:Expe}
@@ -821,10 +579,10 @@ baselines as compared to shallow networks like ResNet-18. }
 \label{tab:imagenet_table}
 \begin{tabular}{cccccccc}
 \multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Scheduler}} &
-\multirow{2}{*}{\textbf{Method}} & \textbf{PGT} & \textbf{\hspace{-0.65cm} Train}
-& \textbf{Train} & \textbf{\hspace{-0.65cm} Test} & \textbf{Test} \\
-& & & \textbf{($\alpha$)} & \textbf{Acc. (\%)} & \textbf{Diff (\%)} &
-\textbf{Acc. (\%)} & \textbf{Diff (\%)} \\
+\multirow{2}{*}{\textbf{Method}} & \textbf{PGT} & \textbf{Train}
+& \textbf{Train} & \textbf{Test} & \textbf{Test} \\
+& & & \textbf{($\alpha$)} & \textbf{Acc.(\%)} & \textbf{Diff(\%)} &
+\textbf{Acc.(\%)} & \textbf{Diff(\%)} \\
 \midrule
 \multirow{2}{*}{SE-ResNet-50} & \multirow{2}{*}{Cosine} & Baseline & - & 81.5 &
 \textcolor{olive}{\multirow{2}{*}{\textbf{+0.97}}} & 77.218 &
@@ -910,7 +668,7 @@ better visualization of the top end of the plots, we scale both axes in log scal
 Because both training and test accuracies improve, it indicates that PowerGrad Transform
 allows the network to learn better representations\footnote{Reproducible code, training
 recipes for the experiments, pretrained checkpoints and training logs are provided at:
-\url{ https://github.com/bishshoy/power-grad-transform }. Code is adapted from
+\url{ https://github.com/skalien/power-grad-transform }. Code is adapted from
 \cite{rw2019timm}.}.
 
 
@@ -942,36 +700,31 @@ total amount of training time can be decreased by $40\%$.
 
 
 
+We examine issues that occur in non-BatchNormalized networks and we provide insight into
+the effects of PGT on such networks. We use ResNet-18 \cite{he2016deep} as the
+foundation model trained on ImageNet-1K \cite{russakovsky2015imagenet}. We found deeper
+networks (such as ResNet-34 and ResNet-50 models) are impossible to train without Batch
+Normalization because of increased depth. So in order to conduct our empirical
+experiments, we solely focus on the ResNet-18 architecture. We designate different
+layers with their corresponding layer indices. We provide a detailed layer-wise index
+list of ResNet-18 in supplementary section \ref{sec:pgt_class_separation}.
 
-
-This section empirically examines some of the issues that occur when networks are
-trained without normalization layers and we provide insight into the effects of
-PowerGrad transform on such networks. We use ResNet-18 \cite{he2016deep} as the
-foundation model for all empirical trials owing to its popularity among deep learning
-practitioners and the relative simplicity with which it can be trained on a big dataset
-such as ImageNet-1K \cite{russakovsky2015imagenet}. We found deeper networks (such as
-ResNet-34 and ResNet-50 models) are impossible to train without BatchNormalization
-because of increased depth. So in order to conduct our empirical experiments, we solely
-focus on the ResNet-18 architecture. For our experiments, we designate different layers
-with their corresponding layer indices. We provide a detailed layer-wise index list of
-ResNet-18 in the supplementary section.
-
-We concentrate on the following metric: the per-filter L2-norm of each layer's weight
-tensor. Throughout the training process, we monitor variations in the per-filter weight
-norm. Because a full plot of each layer's data would use an inordinate amount of space,
-we focus on a few critical layers' plots. The supplementary section contains full plots
-for all layer for various settings. The norm of the weights of the $11^\textit{th}$
-convolutional layer is shown in Fig. \ref{fig:norm_plots}(a). Layer $11$ includes $256$
-filters. Each colour on the figure represents the iteration-wise evolution of a
-particular filter throughout the course of training. The critical point to note is that
-some filters achieve a norm of zero during training. We refer to this event as `Zeroing
-Out', and occurs when a channel of a weight tensor gets fully filled with zeros. If all
-the coefficients of the filter becomes zero, only then the L2 norm of that filter
-becomes zero. If we observe zero filter norm for a filter, then that filter does not
-contribute at all to determine the input-output relationship of a dataset, as the
-feature tensor it produces is also an all-zero tensor. According to our findings, when a
-filter tensor becomes zeroed out, it does not recover with further training. We observe
-both effects \textbf{1)} zeroed out filter \textbf{2)} zeroed out feature.
+Throughout the training process, we monitor variations in the the per-filter L2-norm of
+each layer's weight tensor. Because a full plot of each layer's data would use an
+inordinate amount of space, we focus on a few critical layers' plots. The supplementary
+sections (\ref{sec:plots1} through \ref{sec:plots4}) contains full plots for all layer
+for various settings. The norm of the weights of the $11^\textit{th}$ convolutional
+layer is shown in Fig. \ref{fig:norm_plots}(a). Layer $11$ includes $256$ filters. Each
+colour on the figure represents the iteration-wise evolution of a particular filter
+throughout the course of training. The critical point to note is that some filters
+achieve a norm of zero during training. We refer to this event as `Zeroing Out', and
+occurs when a channel of a weight tensor gets fully filled with zeros. If all the
+coefficients of the filter becomes zero, only then the L2 norm of that filter becomes
+zero. If we observe zero filter norm for a filter, then that filter does not contribute
+at all to determine the input-output relationship of a dataset, as the feature tensor it
+produces is also an all-zero tensor. According to our findings, when a filter tensor
+becomes zeroed out, it does not recover with further training. We observe both effects
+\textbf{1)} zeroed out filter \textbf{2)} zeroed out feature.
 
 
 \begin{figure}[t]
@@ -1172,10 +925,10 @@ baseline owing to the improvements in training as observed in Fig. \ref{fig:agc_
 \label{tab:wobn_table}
 \begin{tabular}{cccccccc}
 \multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Batch Size}} &
-\multirow{2}{*}{\textbf{Method}} & \textbf{PGT} & \textbf{\hspace{-0.65cm} Train}
-& \textbf{Train} & \textbf{\hspace{-0.65cm} Test} & \textbf{Test} \\
-& & & \textbf{($\alpha$)} & \textbf{Acc. (\%)} & \textbf{Diff (\%)} &
-\textbf{Acc. (\%)} & \textbf{Diff (\%)} \\
+\multirow{2}{*}{\textbf{Method}} & \textbf{PGT} & \textbf{Train}
+& \textbf{Train} & \textbf{Test} & \textbf{Test} \\
+& & & \textbf{($\alpha$)} & \textbf{Acc.(\%)} & \textbf{Diff(\%)} &
+\textbf{Acc.(\%)} & \textbf{Diff(\%)} \\
 \midrule
 ResNet-18 & 1024 & Baseline & - & 66.27 & - & 64.816 & - \\
 (non-BN) & 1024 & PGT & 0.92 & \textcolor{red}{\textbf{66.62}} &
@@ -1275,8 +1028,8 @@ of the AGC + PGT method for all layers in the supplementary section.
 norm vs. $\alpha$. The logit norm is calculated per image over the test set of
 ImageNet-1K (at the linear layer of the ResNet-18 architecture) and then averaged.
 \textbf{(b)} Variations in the final loss values obtained for different $\alpha$
-settings. \textbf{(c)} Correlation between loss and logits. Regression line equation
-:$(0.01074 x + 0.25816)$. }
+settings. \textbf{(c)} Correlation between loss and logits. Regression line equation:
+$(0.01074 x + 0.25816)$. }
 \label{fig:stats}
 \end{figure}
 
@@ -1312,17 +1065,14 @@ procedures.
 
 \begin{table}[!t]
 \centering
-\caption{ Ablation study for ResNet-50 on ImageNet-1K. LS column denotes whether label
-smoothing has been applied. A smoothing hyperparameter value of $0.1$ has been used. The
-hyperparameter column that controls the amount of PGT gradient modification injected at
-softmax, Eq. \ref{transformed_probabilities}. }
+\caption{ Ablation study for ResNet-50 on ImageNet-1K. }
 \label{tab:ablation_table}
 \begin{tabular}{cccccccc}
 \multirow{2}{*}{\textbf{\#Row}} & \multirow{2}{*}{\textbf{Model}} &
 \multirow{2}{*}{\textbf{Scheduler}} & \textbf{Label} & \textbf{PGT} &
-\textbf{Train} & \textbf{Test} & \multirow{2}{*}{\textbf{Gap (\%)}} \\
-& & & \textbf{Smoothing} & \textbf{($\alpha$)} & \textbf{Acc. (\%)} &
-\textbf{Acc. (\%)} & \\
+\textbf{Train} & \textbf{Test} & \multirow{2}{*}{\textbf{Gap(\%)}} \\
+& & & \textbf{Smoothing} & \textbf{($\alpha$)} & \textbf{Acc.(\%)} &
+\textbf{Acc.(\%)} & \\
 \midrule
 1. & ResNet-50 & Step & \xmark & \xmark & 78.99 & 75.97 & 3.02 \\
 2. & ResNet-50 & Step & \xmark & 0.3 & 79.56 & 76.494 & 3.066 \\
@@ -1389,23 +1139,288 @@ by locating a more optimum convergence point and simultaneously speeds up traini
 addition, we undertake an ablation research and compare its effects to those of
 regularization methods such label smoothing.
 
-
-
-
+% \end{document}
 
 \bibliographystyle{splncs04}
 \bibliography{references}
-
-
-
 
 \clearpage
 
 \section{Supplementary section}
 \label{sec:Supp}
 
+\subsection{Proofs}
+
+\textbf{Lemma 1.} For any arbitrary probability distribution $P$ with probability values
+given by $p_i$ for $i=1,\dots,C$, the corresponding transformed probability values
+$p_i'$ given by [Eq. \ref{transformed_probabilities}] has a threshold $\Big(\sum
+_{j=1}^C p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}}$ and
+
+\begin{equation} \begin{split} p_i' \geq p_i & \text{,\ \ if } p_i \leq
+\Big(\sum _{j=1}^C p_j^{\alpha }\Big)^{\frac{1}{\alpha-1}} \\ \hspace*{1cm}
+p_i' < p_i & \text{,\ \ if } p_i > \Big(\sum _{j=1}^C
+p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}} \end{split} \label{eqn:threshold}
+\end{equation}
 
 
+\textbf{Proposition 1.} At $\alpha=0$, the stationary threshold equals $1/C$ and all
+values of the transformed distribution $p_i'$ reduces reduces to the uniform
+distribution for $i=1,\dots,C$,.
+
+\textit{Proof.} From Eq. (\ref{eqn:threshold}), we see that the stationary threshold at
+$\alpha=0$ is $1/C$. Also, following from the definition of the transformed
+probabilities (Eq. \ref{transformed_probabilities}) we conclude that if $\alpha=0$, then
+all values of $p_i'$ are $1/C$. Therefore the transformed distribution at $\alpha=0$ is
+a uniform distribution.
+
+
+
+\textbf{Theorem 1.} For any arbitrary probability distribution $P$ with probability
+values $p_i$ for $i=1,\dots,C$, the stationary threshold of the transformed distribution
+$P'$ with probability values $p_i'=\frac{p_i^{\alpha}}{\sum _{j=1}^C p_j^\alpha}, 0 \leq
+\alpha \leq 1$ is a monotonically non-decreasing function with respect to $\alpha$.
+
+\textit{Proof.} To prove monotonicity, we first compute the gradient of the stationary
+threshold with respect to the variable in concern, $\alpha$.
+
+\begin{alignat}{2} & \frac{\partial }{\partial \alpha} \left(\sum _{j=1}^c
+p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}}\ \ = \left(\sum _{j=1}^c
+p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}} \left(\frac{\sum _{j=1}^c p_j^{\alpha } \log
+\left(p_j\right)}{(\alpha -1) \sum _{j=1}^c p_j^{\alpha}}-\frac{\log \left(\sum _{j=1}^c
+p_j^{\alpha}\right)}{(\alpha -1)^2}\right) \\
+& = \frac{1}{\alpha  (\alpha -1)^2} \left(\sum _{j=1}^c p_j^{\alpha
+}\right){}^{\frac{1}{\alpha -1}} \left(\frac{(\alpha -1) \sum _{j=1}^C p_j^{\alpha }
+\log \left(p_j^{\alpha}\right)}{\sum _{j=1}^c p_j^{\alpha }}-\alpha \log \left(\sum
+_{j=1}^c p_j^{\alpha }\right)\right) \label{derivative} \end{alignat}
+
+If $a_1,\dots ,a_n$ and $b_1,\dots ,b_n$ are non-negative numbers, then using the log
+sum inequality, \\ we get $\sum _{j=1}^n a_j \log \left(\frac{a_j}{b_j}\right)\geq
+\left(\sum _{j=1}^n a_j\right) \log \left(\frac{\sum _{j=1}^n a_j}{\sum _{j=1}^n
+b_j}\right)$.
+
+Setting $a_j=p_j^\alpha$ and $b_j=1$, we get the following lower bound
+\begin{equation} \sum _{j=1}^C p_j^{\alpha } \log
+\left(p_j^{\alpha }\right)\geq \left(\sum _{j=1}^C
+p_j^{\alpha}\right) \log \left(\frac{1}{C} \sum _{j=1}^C
+p_j^{\alpha}\right) \label{lower_bound1} \end{equation}
+
+Substituting (\ref{lower_bound1}) in (\ref{derivative}), we get:
+
+\begin{equation} \frac{\partial }{\partial \alpha} \left(\sum
+_{j=1}^c p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}}\ \ \geq
+\frac{1}{\alpha  (\alpha -1)^2} \left(\sum _{j=1}^c
+p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}} \left((1-\alpha )
+\log (C)-\log \left(\sum _{j=1}^C p_j^{\alpha }\right)\right)
+\label{lb_subs} \end{equation}
+
+$p^{\alpha}$ is concave, and so by Jensen's inequality we get the following upper bound
+for the second term:
+
+\begin{equation} \left(\frac{1}{C}{\sum _{j=1}^C
+p_j}{}\right){}^{\alpha }\ \ \geq\ \ \frac{1}{C}{\sum _{j=1}^C
+p_j^{\alpha }}{} \end{equation}
+
+\begin{equation}\Rightarrow\ \ \log \left(\sum _{j=1}^C p_j^{\alpha}\right)\leq
+(1-\alpha ) \log (C) \label{upper_bound} \end{equation}
+
+Substituting (\ref{upper_bound}) in (\ref{lb_subs}),
+
+\begin{equation} \frac{\partial}{\partial \alpha
+}\left(\sum _{j=1}^c p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}}\ \ \geq \ \ 0
+\end{equation}
+
+
+
+\clearpage
+
+\subsection{PGT restricts the partial derivative of the loss w.r.t. each logit from becoming too small or too high}
+\label{sec:pgt_logit_derivative}
+
+We know that neural networks uses the softmax function to generate prediction
+probabilities from logits in multi-class classification tasks. If we use cross-entropy
+loss to train the network then the partial derivative of the loss w.r.t. $i^{th}$ logit
+is dependent on the value of the predicted probability and the value of the class label
+(either 0 or 1) of the $i^{th}$ logit. 
+
+\begin{equation}
+\label{actual_logit_derivative}
+\frac{\partial L}{\partial z_i} = p_i -q_i
+\end{equation}
+In general, the range of the $|\frac{\partial L}{\partial z_i}|$ is [$\delta$,
+$\epsilon$] where, $\delta\rightarrow 0$ and $\epsilon\rightarrow 1$ in traditional
+training (Eq. \ref{actual_logit_derivative} procedures of neural networks. Here, we
+propose a new method of neural network training which alters the gradients at the time
+of backward pass by modifying the predicted probability vector using PGT (Eq.
+\ref{PGT_logit_derivative}) such that the directional derivative for each logit does not
+become too small or too large,
+
+
+With inclusion of PGT in the last layer, the range of the $\widehat{|\frac{\partial
+L}{\partial z_i}|}$ becomes [$\delta^+$, $\epsilon^-$] where, $\delta^+>\delta$ and
+$\epsilon^-<\epsilon$
+
+
+Now we demonstrate how PGT restricts the magnitude of the directional derivative for
+each logit. For a training example, a neural network can assign the highest probability
+to either (i) a wrong class or to the (ii) correct class. 
+
+\textbf{(i) Wrong Class Predicted:}
+If the network assigns the highest probability for any class except the the true class,
+then wrong class assignment happens. We analyze the effect on gradient due to PGT for
+this case. There are three possibilities
+
+(a) Let, $i^{th}$ class be the class for which the network assigns low probability, but
+it is the true class, then
+
+$p_i < p_{th} \Rightarrow p'_i > p_i \Rightarrow \widehat{\frac{\partial L}{\partial
+z_i}} = p'_i -1 >  p_i -1 $ ; where $p_i\rightarrow 0$ \& $q_i = 1$
+
+So; $|\widehat{\frac{\partial L}{\partial z_i}}| = |p'_i -1| <  |p_i -1| \Rightarrow
+|\widehat{\frac{\partial L}{\partial z_i}}| <\epsilon $ where; $\epsilon\rightarrow 1$
+
+(b) Let, $j^{th}$ class be the class (not true class) for which the network assigns the
+highest probability, then
+
+$p_j > p_{th} \Rightarrow p'_j < p_j \Rightarrow \widehat{\frac{\partial L}{\partial
+z_j}} = p'_j <  p_j$ ; where $p_j\rightarrow 1$ \& $q_j = 0$
+
+So, $|\widehat{\frac{\partial L}{\partial z_j}}| <\epsilon$ where; $\epsilon\rightarrow
+1$
+
+
+
+(c) Let $k$ denote the index for all those classes for which the predicted probability
+is low and also the ground truth class label is $0$, then
+
+$p_k < p_{th} \Rightarrow p'_k > p_k \Rightarrow \widehat{\frac{\partial L}{\partial
+z_k}} = p'_k >  p_k$ ; where $p_k\rightarrow 0$ \& $q_k = 0$
+
+So, $|\widehat{\frac{\partial L}{\partial z_k}}| >\delta$ where; $\delta\rightarrow$ 0
+
+\textbf{(ii) Correct Class Predicted:}
+For a given training example, if the network assigns the highest probability to the true
+class then it assigns correct class to the training example. Now we observe the effect
+on gradient due to PGT for this case. There are two possibilities,
+
+(a) Let, $i^{th}$ class be the class for which the network assigns the highest
+probability and it is also the true class, then
+
+$p_i > p_{th} \Rightarrow p'_i < p_i \Rightarrow \widehat{\frac{\partial L}{\partial
+z_i}} = p'_i -1 <  p_i -1 $ ; where $p_i\rightarrow 1$ \& $q_j = 1$
+
+So; $|\widehat{\frac{\partial L}{\partial z_i}}| = |p'_i -1| >  |p_i -1|  \Rightarrow
+|\widehat{\frac{\partial L}{\partial z_i}}| >\delta $ where; $\delta\rightarrow 0$
+
+(b) Let, $k^{th}$ index is used for all those classes for which the predicted
+probability is low and also the actual label value $0$, then
+
+$p_k < p_{th} \Rightarrow p'_k > p_k \Rightarrow \widehat{\frac{\partial L}{\partial
+z_k}} = p'_k >  p_k$ ; where $p_k\rightarrow 0$ \& $q_k = 0$
+
+So, $|\widehat{\frac{\partial L}{\partial z_k}}| >\delta$ where; $\delta\rightarrow 0$
+
+After analyzing all these cases ((i)a,b,c \& (ii)a,b), we are able to deduce that PGT
+helps to restrict the directional derivative to be within limit such that for every
+logit/direction the directional derivative is not very small or very large. 
+
+\subsection{Effect of PGT on weight gradients}
+\label{sec:pgt_weight_gradients}
+
+\begin{figure}[t]
+\centering
+\includegraphics[scale=1.0,width=0.5\columnwidth]{simplenn.jpg}
+\caption{Fully connected layer of a convolutional neural network} 
+\label{fig:simplenn}
+\end{figure} 
+
+
+
+
+In this section, we discuss the impact of PGT on weight gradients. Let the input and
+output of the last convolutional layer of a convolutional neural network be \textbf{x}
+and \textbf{a} respectively (Fig. \ref{fig:simplenn}). The last layer which is a fully
+connected layer, produces logits \textbf{z} by combining \textbf{a} with weights and
+thereafter the network generates the predicted probability vector \textbf{p} from the
+logits using softmax activation function. We note that a$_i \geq 0$ $ \forall i$  as,
+\textbf{a} is the output of ReLU activation functions.
+
+
+Here, $z_i = \sum_{j=1}^{C}w_{ij}a_j$, so $\frac{\partial L}{\partial w_{ij}} =
+a_j\frac{\partial L}{\partial z_{i}} $. However, if we apply PGT while training the
+neural network, then $\widehat{\frac{\partial L}{\partial w_{ij}}}
+=a_j\widehat{\frac{\partial L}{\partial z_i}}$
+
+If the activation of the $j^{th}$ neuron is zero, i.e. $a_j = 0$ then there is zero
+gradient for all weights which acts on $a_j$ both for normal training and training with
+PGT, as $a_j$ has no contribution in the computation of logits. However, the interesting
+thing is to observe the effect of PGT when $a_j > 0$. As, the activation values $(a_j)$
+are positive, so $ \widehat{\frac{\partial L}{\partial z_i}}  > \frac{\partial
+L}{\partial z_{i}} \Rightarrow$ $\widehat{\frac{\partial L}{\partial w_{ij}}} >
+\frac{\partial L}{\partial w_{ij}} \forall j \in (1,2,\ldots C)$ and similar
+relationship for $a_j < 0$. With PGT, the weight updating rule for $(t+1)^{th}$
+iteration then becomes,
+\begin{equation}
+\label{weight_update_PGT}
+w_{ij}^{t+1} = w_{ij}^{t} - \eta \widehat{\frac{\partial L}{\partial w_{ij}^{t}}}
+\end{equation}
+The weight update equation using PGT, can also be viewed in terms of the following
+equation,
+\begin{equation}
+\label{weight_update_final_PGT}
+w_{ij}^{t+1} = w_{ij}^{t} - \frac{\eta}{C_{PGT}} \frac{\partial L}{\partial w_{ij}^{t}}
+\end{equation}
+
+For neural networks, the exponential nature of the softmax function produces sharp
+distribution for predicted probability vector. For example, if \textbf{z} is $[20, 30,
+10]$ then \textbf{p} is equal to $[4\times 10^{-5},  0.99995, 2\times10^{-9}]$. When the
+network is at the initial phase of training, most of the training examples are
+misclassified. Under this scenario, PGT helps to update the weights in a better manner
+than traditional gradients. Suppose the label vector \textbf{q} is $[1, 0, 0]$ then it
+indicates that $z_1$ is the logit corresponding to ground truth class and $z_2$ is the
+logit where the network has assigned the highest probability. Similarly, $z_3$ is the
+logit where the network has assigned a low probability as well as the label vector is
+also $0$ for this logit. Here $\frac{\partial L}{\partial w_{1j}^{t}} = \epsilon a_j > 0
+\Rightarrow$ $ \widehat{\frac{\partial L}{\partial w_{1j}^{t}}} < \frac{\partial
+L}{\partial w_{1j}^{t}} \Rightarrow C_{PGT} > 1$ $\forall j \in (1, 2,\ldots C)$.
+Advanced gradient updation algorithms like AdaGrad \cite{duchi2011adaptive} reduces the
+gradient in the direction where the directional derivative for a weight is high. It
+reduces the learning rate for the weight so that the gradient in that direction is not
+too large in order to make the update process less volatile. The formulation of PGT also
+implicitly reduces the partial derivative in the same manner for the high derivative
+directions, the only difference with the AdaGrad is that $C_{PGT}$ depends only on the
+current iteration's gradient and not on previous iterations like AdaGrad. Similarly we
+can observe that for this example, $\frac{\partial L}{\partial w_{3j}^{t}} = \delta a_j
+\approx 0 \Rightarrow$ $  \widehat{\frac{\partial L}{\partial w_{3j}^{t}}} >
+\frac{\partial L}{\partial w_{3j}^{t}} \Rightarrow C_{PGT} < 1$ $\forall j \in (1,
+2,\ldots C)$. As directional derivative for the weights associated with third logit is
+extremely low, PGT helps to increase the derivative in these directions so that the
+training process does not become too slow.
+
+\subsection{Effect of PGT on class separation}
+\label{sec:pgt_class_separation}
+
+During final iterations of training, we analyze the iteration-wise gradient behaviour
+where the network assigns the highest probability to the correct class for a given
+training example; we deduce the effects of PGT in the next immediate training iteration.
+For example, if \textbf{z} is $[30, 20, 10]$ then \textbf{p} is $[0.99995, 4\times
+10^{-5}, 2\times10^{-9}]$ and \textbf{q} is $[1, 0, 0]$. There is no change in the
+weight update due to PGT when $a_j = 0$. However, when $i \neq 1$ and $a_j > 0$,
+$|\widehat{\frac{\partial L}{\partial w_{1j}^{t}}}| > |\frac{\partial L}{\partial
+w_{1j}^{t}}|$ and $\widehat{\frac{\partial L}{\partial w_{ij}^{t}}} > \frac{\partial
+L}{\partial w_{ij}^{t}}$. Here in this example $\frac{\partial L}{\partial z_{1}^{t}} <
+0 \Rightarrow \frac{\partial L}{\partial w_{1j}^{t}} < 0 \Rightarrow$
+$\widehat{w_{1j}^{t+1}} > w_{1j}^{t+1} > w_{1j}^{t} \forall j$. We also know that
+$z_i^{t+1} = \sum_{j=1}^{C}w_{ij}^{t+1}a_j$ and $\widehat{z_i^{t+1}} =
+\sum_{j=1}^{C}\widehat{w_{ij}^{t+1}}a_j$. It indicates that $\widehat{z_{1}^{t+1}} >
+z_{1}^{t+1} > z_{1}^{t}$ as all the weights associated with first logit is larger while
+using PGT in $(t+1)^{th}$ iteration. Similarly, for the non-true classes
+$\widehat{w_{ij}^{t+1}} < w_{ij}^{t+1} < w_{ij}^{t}$ when $i \neq 1$ $\forall j$ as
+$\frac{\partial L}{\partial z_{i}^{t}} > 0$. So in $(t+1)^{th}$ iteration,
+$\widehat{z_{i}^{t+1}} < z_{i}^{t+1} < z_{i}^{t}$ when $i \neq 1$. We observe that
+$dist(\widehat{z_{1}^{t+1}}, \widehat{z_{i}^{t+1}}) > $  $dist(z_{1}^{t+1},
+z_{i}^{t+1})$ where the first logit corresponds to the true class and all other logits
+indexed by $i$ are non-true classes. Therefore the distance between correct and
+incorrect class logits increases due to PGT and this leads to better class separation.
 
 \subsection{Sample Code}
 
@@ -1420,7 +1435,6 @@ In PyTorch, the available method to modify gradients in the backward pass is usi
 
 
 \clearpage
-
 
 \subsection{Grid search for different values of $\alpha$}
 
@@ -1467,9 +1481,8 @@ assist.
 
 \clearpage
 
-
-
 \subsection{Norm plots of weights (baseline (low batch size)) of non-BN ResNet-18}
+\label{sec:plots1}
 \begin{figure}[ht] \centering \includegraphics[width=0.57\textwidth]{baseline-w_norm}
 \caption{ Method: baseline, batch size = 256. This is a plot depicting the
 iteration-wise evolution of the norm of each filter in each layer. Each subplot
@@ -1479,8 +1492,8 @@ determined colour. } \end{figure}
 
 \clearpage
 
-
 \subsection{Norm plots of weights (baseline (high batch size)) of non-BN ResNet-18}
+\label{sec:plots2}
 \begin{figure}[ht] \centering
 \includegraphics[width=0.57\textwidth]{baseline_high_bs-w_norm} \caption{ Method:
 baseline (high batch size), batch size = 1024. This is a plot depicting the
@@ -1491,8 +1504,8 @@ determined colour. } \end{figure}
 
 \clearpage
 
-
 \subsection{Norm plots of weights (PGT) of non-BN ResNet-18}
+\label{sec:plots3}
 \begin{figure}[ht] \centering \includegraphics[width=0.57\textwidth]{pgt-w_norm}
 \caption{ Method: PGT, batch size = 256. This is a plot depicting the iteration-wise
 evolution of the norm of each filter in each layer. Each subplot corresponds to a layer
@@ -1502,8 +1515,8 @@ filter in each subplot is shown with a separate and randomly determined colour. 
 
 \clearpage
 
-
 \subsection{Norm plots of weights (AGC + PGT) of non-BN ResNet-18}
+\label{sec:plots4}
 \begin{figure}[ht] \centering \includegraphics[width=0.57\textwidth]{agc_pgt-w_norm}
 \caption{ Method: AGC + PGT, batch size = 256. This is a plot depicting the
 iteration-wise evolution of the norm of each filter in each layer. Each subplot
@@ -1515,8 +1528,8 @@ determined colour. } \end{figure}
 
 \clearpage
 
-
 \subsection{ResNet-18 Layer Index Diagram}
+\label{sec:r18_layers}
 
 For the layer indices used in figures Fig. \ref{fig:norm_plots}, \ref{fig:high_bs},
 \ref{fig:agc_pgt}, we provide a block diagram depicting the different convolutional
