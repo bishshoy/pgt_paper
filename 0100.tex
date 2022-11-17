@@ -17,6 +17,8 @@
 \usepackage{color}
 \graphicspath{{images/}}
 \raggedbottom
+\newcommand{\forceindenta}{\parindent=1em\indent\parindent=0pt\relax}
+\newcommand{\forceindentb}{\parindent=1.65em\indent\parindent=0pt\relax}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \NewDocumentCommand{\codeword}{v}{\texttt{\textcolor{orange}{#1}}}
@@ -114,9 +116,9 @@ W_i^{t+1} = W_i^t - \lambda\ \nabla_{W_i}(L)
 i=D,D-1,\ldots,1
 \end{equation}
 
-\textbf{Type I:} Independent gradient modification at multiple points: In this method,
-the gradients are first computed using standard procedure and then individually altered
-as shown in Fig. \ref{fig:gradient_altering}(b). Gradient clipping
+\textbf{Type I:} Independent gradient modification at multiple points: Here the
+gradients are first computed using standard procedure and then individually altered as
+shown in Fig. \ref{fig:gradient_altering}(b). Gradient clipping
 \cite{pascanu2013difficulty} and Adaptive gradient clipping \cite{brock2021high} are
 examples of such modifications. In both of these methods, the gradients are first
 computed using standard rules and then they are modified using some function. It can be
@@ -301,7 +303,7 @@ _{j=1}^C p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}}$ and
 \begin{equation} \begin{split} p_i' \geq p_i & \text{,\ \ if } p_i \leq
 \Big(\sum _{j=1}^C p_j^{\alpha }\Big)^{\frac{1}{\alpha-1}} \\ \hspace*{1cm}
 p_i' < p_i & \text{,\ \ if } p_i > \Big(\sum _{j=1}^C
-p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}} \end{split} \label{eqn:threshold}
+p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}} \end{split} \label{eqn:threshold0}
 \end{equation}
 
 \vspace{-0.2cm}
@@ -517,56 +519,55 @@ training.
 
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/baseline-w-layer-4-2}
-\caption{Layer 11\\ \textbf{(baseline)}
-}\end{subfigure}
+\caption{Layer 11\\ \forceindentb\textbf{baseline}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/pgt-w-layer-4-2}
-\caption{Layer 11\\ \textbf{(PGT)}
-}\end{subfigure}
+\caption{Layer 11\\ \forceindentb\textbf{PGT}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/baseline-w-layer-7-2}
-\caption{Final layer\\ \textbf{(baseline)}
-}\end{subfigure}
+\caption{Layer 19\\ \forceindentb\textbf{baseline}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/pgt-w-layer-7-2}
-\caption{Final layer\\ \textbf{(PGT)}
-}\end{subfigure}
-\captionsetup{font=scriptsize}
+\caption{Layer 19\\ \forceindentb\textbf{PGT}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/baseline-f-layer-22-1}
-\caption{Norm of final layer's features\\ \textbf{(baseline)}
-}\end{subfigure}
+\caption{\scriptsize{GAP\\\forceindentb features}\\ \forceindentb\textbf{baseline}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/pgt-f-layer-22-1}
-\caption{Norm of final layer's features\\ \textbf{(PGT)}
-}\end{subfigure}
+\caption{\scriptsize{GAP\\\forceindentb features}\\ \forceindentb\textbf{PGT}}
+\end{subfigure}
 
 \vspace{6pt}
 
 \captionsetup{font=footnotesize}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/baseline-w-layer-5-3}
-\caption{Layer 15\\ \textbf{(baseline)}
-}\end{subfigure}
+\caption{Layer 15\\ \forceindentb\textbf{baseline}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/pgt-w-layer-5-3}
-\caption{Layer 15\\ \textbf{(PGT)}
-}\end{subfigure}
+\caption{Layer 15\\ \forceindentb\textbf{PGT}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/agc_pgt-w-layer-5-3}
-\caption{Layer 15\\ \textbf{(AGC+PGT)}}
+\caption{Layer 15\\ \forceindenta\textbf{AGC+PGT}}
 \end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/baseline-w-layer-1-2}
-\caption{Layer 2\\ \textbf{(baseline)}
-}\end{subfigure}
+\caption{Layer 2\\ \forceindentb\textbf{baseline}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/pgt-w-layer-1-2}
-\caption{Layer 2\\ \textbf{(PGT)}
-}\end{subfigure}
+\caption{Layer 2\\ \forceindentb\textbf{PGT}}
+\end{subfigure}
 \begin{subfigure}[t]{0.16\textwidth}
 \includegraphics[width=\textwidth]{trimmed/agc_pgt-w-layer-1-2}
-\caption{Layer 2\\ \textbf{(AGC+PGT)}}
+\caption{Layer 2\\ \forceindenta\textbf{AGC+PGT}}
 \end{subfigure}
 \captionsetup{font=normalsize}
 \caption{ Norm vs iter. plots demonstrating layer characteristics (the zero out
@@ -585,21 +586,22 @@ ResNet-18. }
 
 
 Fig. \ref{fig:norm_plots}(c) and \ref{fig:norm_plots}(e) are the plot of the final conv
-layer's filters and the final global average pooling layer respectively. We observe a
-number of filters completely zeroing out. The feature vector here directly interfaces
-with the fully connected layer immediately after. Therefore any zeroed out features
-leads to permanent information loss, as it does not contribute to the learning of
-decision boundaries in the fully connected layer. Also, zeroed out weights tensors lead
-to zeroed out gradients hence stopping training for all subsequent iterations leading to
-a collapse in training for the affected layers. With large batch sizes, it is possible
-that an entire layer zeroes out [Fig. \ref{fig:high_bs}]. Gradient modification methods
-such as PGT or AGC can alleviate the zeroing out phenomena. We observe that the number
-of zeroed out filters has considerably reduced [Fig. \ref{fig:norm_plots}(b, d)]. The
-final feature tensor [Fig. \ref{fig:norm_plots}(f)] with PGT enabled, does not contain
-any zeroed out regions indicating that information loss is mitigated as the features
-pass on from the feature extracting layers to the fully connected layer. When PGT and
-AGC are combined, we get the most benefit for layer $15$ [Fig \ref{fig:norm_plots}(g-i)]
-and layer $2$ [Fig \ref{fig:norm_plots}(j-l)].
+layer's filters (layer $19$) and the features output of global average pooling (GAP)
+layer respectively. We observe a number of filters in the final layer completely zeroing
+out. The feature vector after GAP layer directly interfaces with the fully connected
+layer immediately after. Therefore any zeroed out features leads to permanent
+information loss, as it does not contribute to the learning of decision boundaries in
+the fully connected layer. Also, zeroed out weights tensors lead to zeroed out gradients
+hence stopping training for all subsequent iterations leading to a collapse in training
+for the affected layers. With large batch sizes, it is possible that an entire layer
+zeroes out [Fig. \ref{fig:high_bs}]. Gradient modification methods such as PGT or AGC
+can alleviate the zeroing out phenomena. We observe that the number of zeroed out
+filters has considerably reduced [Fig. \ref{fig:norm_plots}(b, d)]. The final feature
+tensor [Fig. \ref{fig:norm_plots}(f)] with PGT enabled, does not contain any zeroed out
+regions indicating that information loss is mitigated as the features pass on from the
+feature extracting layers to the fully connected layer. When PGT and AGC are combined,
+we get the most benefit for layer $15$ [Fig \ref{fig:norm_plots}(g-i)] and layer $2$
+[Fig \ref{fig:norm_plots}(j-l)].
 
 
 
@@ -890,10 +892,6 @@ Substituting (\ref{upper_bound}) in (\ref{lb_subs}),
 }\left(\sum _{j=1}^c p_j^{\alpha}\right){}^{\frac{1}{\alpha -1}}\ \ \geq \ \ 0
 \end{equation}
 
-
-
-\clearpage
-
 \subsection{PGT restricts the partial derivative of the loss w.r.t. each logit from becoming too small or too high}
 \label{sec:pgt_logit_derivative}
 
@@ -1083,6 +1081,8 @@ z_{i}^{t+1})$ where the first logit corresponds to the true class and all other 
 indexed by $i$ are non-true classes. Therefore the distance between correct and
 incorrect class logits increases due to PGT and this leads to better class separation.
 
+\clearpage
+
 \subsection{Sample Code}
 
 In PyTorch, the available method to modify gradients in the backward pass is using the
@@ -1105,7 +1105,7 @@ In PyTorch, the available method to modify gradients in the backward pass is usi
 \includegraphics[width=0.5\columnwidth]{r18_grid_search}
 \caption{ Grid search for various values of $\alpha$ for ResNet-18 architecture with the
 ImageNet dataset. Each datapoint is collected over a 50 epoch budget, with other
-hyperparameters kept the same as mentioned in section \ref{sec:bn}. }
+hyperparameters kept the same as mentioned in section \ref{sec:Expe}. }
 \label{fig:grid_searcha}
 \end{figure}
 
@@ -1115,7 +1115,7 @@ hyperparameters kept the same as mentioned in section \ref{sec:bn}. }
 \includegraphics[width=0.5\columnwidth]{r50_grid_search}
 \caption{ Grid search for various values of $\alpha$ for ResNet-50 architecture with the
 ImageNet dataset. Each datapoint is collected over a 50 epoch budget, with other
-hyperparameters kept the same as mentioned in section \ref{sec:bn}. }
+hyperparameters kept the same as mentioned in section \ref{sec:Expe}. }
 \label{fig:grid_searchb}
 \end{figure}
 
