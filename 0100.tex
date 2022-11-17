@@ -64,7 +64,7 @@ few lines of code. PGT accelerates training and makes it possible for the networ
 better fit the training data. With decoupled training, PGT improves baseline accuracies
 for ResNet-50 by 0.73\%, for SE-ResNet-50 by 0.66\% and by more than 1.0\% for the
 non-normalized ResNet-18 network on the ImageNet classification task.
-\keywords{backpropagation \and gradients \and neural networks \and softmax \and clipping.}
+\keywords{backpropagation \and gradients \and softmax \and clipping \and classification.}
 \end{abstract}
 
 \section{Introduction}
@@ -687,7 +687,7 @@ ResNet-18 & 1024 & Baseline & - & 66.27 & - & 64.816 & - \\
 
 
 
-\begin{figure}[!bp]
+\begin{figure}[!t]
 \centering
 \begin{subfigure}{0.33\textwidth}
 \centering
@@ -711,6 +711,7 @@ ImageNet-1K (at the linear layer of the ResNet-18 architecture) and then average
 settings. \textbf{(c)} Correlation between loss and logits. Regression line equation:
 $(0.01074 x + 0.25816)$. }
 \label{fig:stats}
+\vspace{-0.5cm}
 \end{figure}
 
 
