@@ -11,10 +11,12 @@
 \usepackage{listings}
 \usepackage{booktabs}
 \usepackage{pifont}
+\usepackage{wrapfig}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{color}
 \graphicspath{{images/}}
+\raggedbottom
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 \NewDocumentCommand{\codeword}{v}{\texttt{\textcolor{orange}{#1}}}
@@ -40,7 +42,7 @@ tabsize=2 }
 \begin{document}
 \title{Altering Backward Pass Gradients to improve Convergence}
 \author{Bishshoy Das\inst{1}\orcidID{0000-0002-6525-4015}\and Milton Mondal\inst{1}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Brejesh Lall\inst{3}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Shiv Dutt Joshi\inst{3}\orcidID{0000-0002-0326-0524}\and Sumantra Dutta Roy\inst{3}\orcidID{0000-0002-2141-5067}}
-\authorrunning{B. Das et al.}
+\authorrunning{Das et al.}
 \institute{Indian Institute of Technology Delhi, New Delhi - 110016, India \\ \email{\{bishshoy.das, milton.mondal, brejesh, sdjoshi, sumantra\}@ee.iitd.ac.in}}
 \maketitle
 
@@ -70,7 +72,7 @@ non-normalized ResNet-18 network on the ImageNet classification task.
 
 
 
-Backpropagation is traditionally used to train deep neural networks
+Backpropagation is traditionally used for training deep neural networks
 \cite{lillicrap2020backpropagation}. Gradients are computed using basic calculus
 principles to adjust the weights during backpropagation \cite{lecun1988theoretical}.
 Alternatives to traditional gradients has rarely been studied in the literature
@@ -82,11 +84,7 @@ convergent accuracy has hardly been explored. In this paper we explore the lands
 decoupling the forward pass from the backward pass by altering the gradients and
 subsequently updating the network's parameters with the modified gradients. There are
 several ways to achieve gradient modification in the backward pass. We discuss a few
-techniques in Fig. \ref{fig:gradient_altering}. One could modify the gradients at either
-\textbf{(I)} multiple points in the backward computation graph or \textbf{(II)} at a
-point very early in the backward graph and allow this changed gradient to also affect
-the rest of the network's gradients as it backpropagates through the backward
-computation graph.
+techniques in Fig. \ref{fig:gradient_altering}.
 
 
 
@@ -94,14 +92,11 @@ computation graph.
 \centering
 \includegraphics[width=\textwidth]{PGT_Types}
 \caption{ Different ways of altering gradients in the backward pass. Blue blocks denote
-a CNN's different layers (convolutional, linear, batchnorm, softmax, etc.). Orange
-blocks indicate the backward graph with unmodified gradients. Green blocks represent
-transformation functions, while red blocks indicate transformed gradients. (a)
-\textbf{Type 0:} Backpropagation without any gradient modification. (b) \textbf{Type I:}
-Altering gradients after they are all computed. (c) \textbf{Type II:} Altering gradients
-at an earlier stage in the backward computation graph, subsequently leading to
-alteration of all other gradients. }
+a different layers. Orange blocks indicate the backward graph with unmodified gradients.
+Green blocks represent transformation functions, while red blocks indicate transformed
+gradients. }
 \label{fig:gradient_altering}
+\vspace{-0.5cm}
 \end{figure}
 
 
@@ -119,7 +114,7 @@ W_i^{t+1} = W_i^t - \lambda\ \nabla_{W_i}(L)
 i=D,D-1,\ldots,1
 \end{equation}
 
-\textbf{Type I:} Gradient modification at multiple points independently: In this method,
+\textbf{Type I:} Independent gradient modification at multiple points: In this method,
 the gradients are first computed using standard procedure and then individually altered
 as shown in Fig. \ref{fig:gradient_altering}(b). Gradient clipping
 \cite{pascanu2013difficulty} and Adaptive gradient clipping \cite{brock2021high} are
@@ -158,25 +153,12 @@ because of the early injection of the transformed gradient $\nabla_{W_D}(L)$, al
 gradient vectors that are connected to the transformed gradient through the chain rule
 ($\nabla_{W_i}(L)^{*}$,\ \ i=D-1,\ldots,1), gets subsequently altered.
 
-Type I modification is computationally more expensive than Type II modification as it
-requires altering the gradients of each and every parameter individually. Type II
-modification recomputes gradients at each and every location through the natural flow of
-backpropagation. We propose PowerGrad Transform (PGT) which is a type II gradient
-modification method. With virtually no additional compute or memory requirement,
-PowerGrad Transform enhances classification performance of a convolutional neural
-network, by leading the network to arrive at a higher quality optima at convergence, at
-which both training and test accuracies improve.
+Type I is computationally more expensive than type II as it requires altering the
+gradients of each and every parameter individually. Type II modification recomputes
+gradients at each and every location through the natural flow of backpropagation. We
+propose PowerGrad Transform (PGT), a type II method that modifies the gradients at the
+softmax layer.
 
-
-PowerGrad Transform modifies the gradients at the softmax layer, which is the earliest
-part of most convolutional neural network's backward computation graph. By changing the
-gradient at this stage, all other gradients for all other parameters in the network such
-as the linear layer, batchnorm statistics and convolutional layer's filter parameters
-are affected. We analyze and explore the behaviour of such alteration both
-mathematically and through empirical experiments conducted on networks without
-batch-normalization. Experimentally, we see that PGT improved training and test
-accuracies for both normalized and non-normalized networks. PGT improves a network's
-learning capacity and results in a better fit of the training data.
 
 
 
@@ -184,29 +166,20 @@ The following are the major contributions of this paper:
 
 \begin{enumerate}
 
-\item We introduce PowerGrad Transform, which decouples the backward and the forward
-passes of neural network training and enables a considerably better fit to the dataset,
-as assessed by both training and test accuracy measures. PGT is a performance
-enhancement method that alters the gradients in the backward pass before the update step
-leading to accelerated training and a significant boost in the network's predictive
-performance.
+\item We propose PowerGrad Transform, which decouples the backward and the forward
+passes of neural network training and enables a considerably better fit to the dataset.
+PGT is a performance enhancement method that alters the gradients in the backward pass
+before the update step leading to accelerated training and a significant boost in the
+network's predictive performance.
 
 \item We perform theoretical analysis of the properties of the PowerGrad transformation
-(section \ref{sec:pgt_prop}) and explore its effect on weight parameters and gradients
-(section \ref{sec:pgt_weight_gradients}), logits (section
-\ref{sec:pgt_logit_derivative}), (section \ref{sec:Effe}), loss values (section
-\ref{sec:Effe}) and class separation (section \ref{sec:pgt_class_separation}).
-
-\item We study experimentally the degenerate behaviour of non-BN networks that is often
-seen during the normal training procedure, particularly at larger batch sizes. With PGT,
-we see improved gradient behaviour and a decreased likelihood of the weights attaining
-degenerate states.
+(section \ref{sec:pgt_prop}) and explore its effect on weight parameters and gradients,
+logits, loss values and class separation (section \ref{sec:pgt_effects}).
 
 \item We provide complete results from a variety of models (non-BN and BN ResNets,
-SE-ResNets) using the ImageNet dataset. It helps the network to improve its learning
-capabilities by locating a more optimum convergence point. Additionally, we conduct an
-ablation study and compare its impacts to those of regularization approaches such as
-label smoothing.
+SE-ResNets) using the ImageNet dataset. We empirically conclude that PGT helps a network
+to improve by locating a more optimum convergence point. Additionally, we conduct
+ablation studies and compare its effects to those of regularization methods.
 
 \end{enumerate}
 
@@ -214,166 +187,39 @@ label smoothing.
 \label{sec:Rela}
 
 
-
-
-We examine techniques that are related to gradient modification and emphasize the
-distinction between them and our proposed method.
-
-
-
-
-Gradient Clipping (GC): Gradient Clipping \cite{pascanu2013difficulty}, often used in
-natural language processing methods \cite{merity2017regularizing}, is a technique that
-involves changing or clipping the gradients with respect to a predefined threshold value
-during backward propagation through the network and updating the weights using the
-clipped gradients \cite{zhang2019gradient} \cite{smith2020generalization}. By rescaling the
-gradients, the weight updates are likewise rescaled, significantly reducing the risk of
-an overflow or underflow \cite{pascanu2012understanding}. GC can be used for training
-networks without batch-normalization.
-
-The formulation is as follows: If $G$ is a gradient vector which is $\partial L /
-\partial \theta$ (the gradient of the loss $L$ with respect to the parameters $\theta$).
-In clip by value, the gradients are modified as:
-
-
-
-\begin{equation}
-G \rightarrow
-\begin{cases}
-\lambda \frac{G}{\norm{G}} & \text{if } \norm{G} > \lambda, \\
-G & \text{otherwise}
-\end{cases}
-\end{equation}
-
-
-
-At larger batch sizes, the clipping threshold in GC becomes highly sensitive and
-requires extensive finetuning for various models, batch sizes, and learning rates. As we
-demonstrate later in our studies, GC is not as effective in improving the performance of
-non-normalized networks. AGC performs better than GC in non-normalized networks.
-However, we show that PGT outperforms both in such networks.
-
-
-
-
-Adaptive Gradient Clipping (AGC): Adaptive Gradient Clipping \cite{brock2021high} is
-developed to further enhance backward pass gradients than what is performed by GC. It
-takes into account the fact that the ratio of the gradient norm to the weight norm can
-provide an indication of the expected change in a single step of optimization. Here the
-normalized gradient is clipped by $\lambda$, which means that large weights can have
-large gradients and still the normalized gradient can be within $\lambda$. If it is not
-within the threshold, then their gradient is normalized by the ratio of norm of the
-gradient and norm of the weight in order to avoid gradient explosion. If $W^l$ is the
-weight matrix of the $l^\textit{th}$ layer, and $G^l$ is its gradient in the backward
-pass, then the following equation is used to modify the gradient of the $i^\textit{th}$
-filter before its update:
-
-\begin{equation}
-G_{i}^{l}\rightarrow
-\begin{cases}
-\lambda \frac{\norm{W_{i}^{l} }_{F}^{*}}{\norm{G_{i}^{l} }_{F}} G_{i}^{l} & if\ \frac{\norm{G_{i}^{l} }_{F}}{\norm{W_{i}^{l} }_{F}^{*}} \  >\ \lambda \\
-G_{i}^{l} & otherwise
-\end{cases}
-\end{equation}
-
-
-
-The hyperparameter $\lambda$ of AGC is less sensitive to changes in batch size and depth
-as observed in \cite{brock2021high}. However, when applied to vanilla residual networks
-(ResNet-18), the performance is still afar from normalized variants as demonstrated by
-our experiments. In most cases, AGC is used for training networks without
-batch-normalization. Our experiments demonstrate that PGT outperforms AGC, when used
-independently. When used together, it can further improve a network's performance
-(section \ref{sec:Empi}).
-
-
-
-
-
-
-
-
-Label Smoothing: Label smoothing, introduced by Szegedy et al.
+Gradient Clipping \cite{pascanu2013difficulty} is a technique that involves changing or
+clipping the gradients with respect to a predefined threshold value during backward
+propagation through the network and updating the weights using the clipped gradients
+\cite{zhang2019gradient}\cite{smith2020generalization}. By rescaling the gradients, the
+weight updates are likewise rescaled, significantly reducing the risk of an overflow or
+underflow \cite{pascanu2012understanding}. GC can be used for training networks without
+batch-normalization. At larger batch sizes, the clipping threshold in GC becomes highly
+sensitive and requires extensive finetuning for various models, batch sizes, and
+learning rates. As we demonstrate later in our studies, GC is not as effective in
+improving the performance of non-normalized networks. Adaptive Gradient Clipping
+\cite{brock2021high} is developed to further enhance backward pass gradients than what
+is performed by GC. It takes into account the fact that the ratio of the gradient norm
+to the weight norm can provide an indication of the expected change in a single step of
+optimization. Label smoothing, introduced by Szegedy et al.
 \cite{szegedy2016rethinking}, utilizes smoothing of the ground truth labels as a method
-to impose regularization on the logits and the weights of the neural network.
+to impose regularization on the logits and the weights of the neural network. AGC
+performs better than GC in non-normalized networks. However, we show that PGT
+outperforms both in such networks.
 
-
-
-The formulation is as follows. If $q_i$ is the value at the $i^{th}$ index of the one
-hot encoded vector of the ground truth label, then the transformed distribution of the
-labels $q_i'$ is: \begin{equation} q_i' = \begin{cases} 1-\epsilon & \text{if } i = y,
-\\ \frac{\epsilon}{K-1} & otherwise \end{cases} \end{equation} where $\epsilon$ is a
-hyperparameter with a value in $[0,1]$ and $y$ denotes the index of the correct class.
-
-
-
-Müller et al. investigates how label smoothing work in \cite{DBLP:conf/nips/MullerKH19}.
-Using visualizations of penultimate layer activations, they demonstrate that label
-smoothing calibrates the networks predictions and aligns them with the accuracies of the
-predictions. Parallel works in label smoothing include Pairwise Confusion
-\cite{dubey2018pairwise}, combatting Label Noise \cite{reed2014training}, achieving
-regularization through intentional label modification \cite{xie2016disturblabel}.
-
-PowerGrad Transform works in a much different way. PGT does not smooth the ground truth
-labels, rather it modifies the gradient by smoothing the predicted probability vector.
-As we show in section \ref{sec:Math}, our proposed transformation has the opposite
-effect of label smoothing. From our studies, we show that PGT in fact leads to larger
-generalization gap between the training and test dataset, although it does lead to an
-increase in both training and test accuracies at convergence. Coupled with PGT, label
-smoothing can narrow the generalization gap, while retaining the benefits of PGT.
-
-
-
-Knowledge Distillation: The formulation of PowerGrad Transform is akin to temperature
-based logit suppression of \cite{hinton2015distilling}. Knowledge distillation
-\cite{DBLP:conf/nips/BaC14} is a process in which two networks are trained. First a
-teacher network is trained on a given dataset and then the soft-labels (the predicted
-probabilities) of the teacher network are used to train another network, called the
-student network. In similar style of label smoothing, knowledge distillation aims to
-generate smooth gradient behaviour by forcing the network not to overpredict on any
-single image. As in case of label smoothing, the student network's weights are
-automatically penalized if the network assigns a probability value higher than the soft
-labels generated by the teacher network. Variants of knowledge distillation include
-self-distillation \cite{zhang2019your} \cite{wang2021memory}, identical student network
-distillation \cite{furlanello2018born}, channel distillation \cite{ge2019distilling},
-regularizing wrong predictions \cite{yun2020regularizing} and representation or
-embedding based knowledge distillation \cite{aguilar2020knowledge} \cite{yao2018deep}
-\cite{passalis2018unsupervised}. Distillation is applied to various tasks such as model
-compression \cite{wang2020real}, face recognition \cite{ge2018low}, enhancing ensemble
-performance \cite{zhang2018deep}, interpreting neural networks \cite{liu2018improving}.
-Efficacy of distillation is extensivly studied in \cite{cho2019efficacy}
-\cite{yuan2020revisiting}. Applications of logit suppression include: deep metric
-learning \cite{zhai2018classification}, non-parametric neighborhood component analysis
-\cite{wu2018improving}, sequence-to-sequence modelling \cite{chorowski2016towards},
-reinforcement learning \cite{he2018determining} and face recognition
-\cite{liu2017sphereface} \cite{wang2018cosface}.
-
-The key difference between PGT and distillation methods is that in the latter, the
-transformation is applied in the forward pass, while PGT is a backward pass modification
-only. Also, in distillation settings the temperature parameter is a part of the
-network's computation graph. In the case of PowerGrad Transform, we directly tamper the
-gradients without introducing any change in the forward pass. It is a more generalized
-way of arriving at altered gradients in the backward pass. Moreover we show that
-modifying the gradients in the backward pass can improve performance in many cases. The
-rise in training accuracy indicates that PGT enables the network to learn more from the
-training data.
-
-Self-knowledge distillation is used in many papers in different ways, which mainly
-focuses on improving the performance of the model by either creating multiple ensemble
-student models \cite{zhang2018deep}, using different distorted versions of same data
-with two different versions of a single network which guides one another
-\cite{xu2019data} or injecting multiple sub-modules in the network to improve its
-capacity \cite{zhang2019your}. However none of these methods use normal traditional
-training without introducing sub-modules in the architecture. PGT differs from
-self-knowledge distillation as it neither introduces any additional sub-modules nor
-creates different ensembles to improve the performance of the model. PGT follows the
-standard neural network training mechanism with a single change which is altering the
-last layer's gradients in the backward pass.
-
-
-Other techniques of weight update include slot machines \cite{aladago2021slot}, where
-random weights are generated and carefully selected during backpropagation in a way that
-minimizes the loss function.
+Knowledge distillation \cite{hinton2015distilling} is a process in which two networks
+are trained with hard and soft labels alternatively. Variants of knowledge distillation
+include self-distillation \cite{zhang2018deep}, identical student network distillation
+\cite{furlanello2018born}, channel distillation \cite{ge2019distilling}, regularizing
+wrong predictions \cite{yun2020regularizing} and representation or embedding based
+knowledge distillation \cite{yao2018deep}\cite{aguilar2020knowledge}. The key difference between PGT and knowledge
+distillation is that in the latter, the transformation is applied in the forward pass,
+while PGT is a backward pass modification only. Also, in distillation settings the
+temperature parameter is a part of the network's computation graph. In the case of
+PowerGrad Transform, we directly tamper the gradients without introducing any change in
+the forward pass. PGT differs from self-knowledge distillation as it neither introduces
+any additional sub-modules nor creates different ensembles to improve the performance of
+the model. PGT follows the standard neural network training mechanism with modified
+gradients.
 
 \section{PowerGrad Transform}
 \label{sec:Powe}
@@ -397,23 +243,22 @@ distribution. As $\alpha$ reduces from $1$ to $0$, the probability distributions
 unordered or right: ordered) becomes flatter and flatter, approaching the uniform
 distribution of $1/C$ for every index. }
 \label{fig:prob_plots}
+\vspace{-0.5cm}
 \end{figure}
 
 
-
-The PowerGrad Transform technique is described in this section. It is a general
-technique and can be applied to any neural network. A neural network with parameters $W$
-generates $C$ logits denoted by $z$ for every input vector $x$. $z$ is given as $z=Wx$.
-Then a set of probability values $p_i$ are generated from the logits using a softmax
-function which is defined as $p_i=\frac{e^{z_i}}{\sum _{j=1}^C e^{z_j}}$. $p_i$ and
-$z_i$ represent the predicted probability values and the logits for the $i^{th}$ class
-respectively. Following this step, the loss function is invoked and the loss between the
-predicted probability values the ground truth labels (which is also a probability
-distribution) is calculated. If the loss function is cross-entropy loss, then the value
-of the loss is given as $L=-\sum _{i=1}^C q_i \log \left(p_i\right)$ where $q_i$ is the
-ground truth label of the $i^{th}$ class for a particular training example. By standard
-gradient update rule, we can calculate the gradient of the loss with respect to the
-logits which takes the form $\frac{\partial L}{\partial z_i}=p_i-q_i$.
+A neural network with parameters $W$ generates $C$ logits denoted by $z$ for every input
+vector $x$. $z$ is given as $z=Wx$. Then a set of probability values $p_i$ are generated
+from the logits using a softmax function which is defined as $p_i=\frac{e^{z_i}}{\sum
+_{j=1}^C e^{z_j}}$. $p_i$ and $z_i$ represent the predicted probability values and the
+logits for the $i^{th}$ class respectively. Following this step, the loss function is
+invoked and the loss between the predicted probability values the ground truth labels
+(which is also a probability distribution) is calculated. If the loss function is
+cross-entropy loss, then the value of the loss is given as $L=-\sum _{i=1}^C q_i \log
+\left(p_i\right)$ where $q_i$ is the ground truth label of the $i^{th}$ class for a
+particular training example. By standard gradient update rule, we can calculate the
+gradient of the loss with respect to the logits which takes the form $\frac{\partial
+L}{\partial z_i}=p_i-q_i$.
 
 The PowerGrad Transform technique is now described. We introduce a hyperparameter
 $\alpha$, which takes a value between $[0, 1]$ and regulates the degree of gradient
@@ -421,6 +266,7 @@ modification. Fig. \ref{fig:prob_plots} shows the effects of the transform under
 different values of $\alpha$ for different distributions. The PowerGrad Transform method
 modifies the predicted probability values in the backward pass as follows:
 
+\vspace{-0.5cm}
 \begin{equation} \hspace*{3.5cm} p_i'=\frac{p_i^{\alpha }}{\sum _{j=1}^C
 p_j^\alpha} \ \ \ \ \ \ \ \ i=1,\dots,C\ \ \ \ \ 0 \leq \alpha\leq 1
 \label{transformed_probabilities} \end{equation}
@@ -428,6 +274,7 @@ p_j^\alpha} \ \ \ \ \ \ \ \ i=1,\dots,C\ \ \ \ \ 0 \leq \alpha\leq 1
 The above transformation changes the gradient of the loss with respect to the logits as
 follows:
 
+\vspace{-0.5cm}
 \begin{equation} \widehat{\frac{\partial L}{\partial z_i}}=p_i'-q_i
 \label{PGT_logit_derivative}
 \end{equation}
@@ -438,36 +285,26 @@ distribution as $P'$ (with values $p_i'$ at the $i^{th}$ index).
 
 
 
-A code snippet of the algorithm implemented using PyTorch \cite{NEURIPS2019_9015} is
-given in the appendix. In PyTorch, the available method to modify gradients in the
-backward pass is using the \codeword{register_hook} function which is called in the
-\codeword{forward} function. We explore the effect of this change from a theoretical
-standpoint in section \ref{sec:Math}. In section \ref{sec:Expe}, we offer empirical data
-and experiments to support the proposed method.
-
-\section{Analysis of the PowerGrad transformation}
-\label{sec:Math}
-
-In this section, we first describe the properties of the  PowerGrad Transform (PGT) and
-then we highlight how these suitable properties of PGT helps the neural network to
-improve the performance. We use the same setup as described in section \ref{sec:Powe}.
-To explore the properties of PGT, we start by investigating the effect of the transform
-on the softmax probabilities.
-
-\subsection{Properties}
+\subsection{Properties of the PowerGrad transformation}
 \label{sec:pgt_prop}
+
+We use the same setup as described in section \ref{sec:Powe}. To explore the properties
+of PGT, we start by investigating the effect of the transform on the softmax
+probabilities.
 
 \textbf{Lemma 1.} For any arbitrary probability distribution $P$ with probability values
 given by $p_i$ for $i=1,\dots,C$, the corresponding transformed probability values
 $p_i'$ given by [Eq. \ref{transformed_probabilities}] has a threshold $\Big(\sum
 _{j=1}^C p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}}$ and
 
+\vspace{-0.5cm}
 \begin{equation} \begin{split} p_i' \geq p_i & \text{,\ \ if } p_i \leq
 \Big(\sum _{j=1}^C p_j^{\alpha }\Big)^{\frac{1}{\alpha-1}} \\ \hspace*{1cm}
 p_i' < p_i & \text{,\ \ if } p_i > \Big(\sum _{j=1}^C
 p_j^{\alpha}\Big)^{\frac{1}{\alpha-1}} \end{split} \label{eqn:threshold}
 \end{equation}
 
+\vspace{-0.2cm}
 We call this threshold, the \textit{stationary threshold}. The stationary threshold is
 that value of $p_i$ that does not change after the transformation. Therefore, when $p_i$
 is greater than the \textit{stationary threshold}, $p_i' < p_i$.
@@ -494,22 +331,17 @@ $P'$ with probability values $p_i'=\frac{p_i^{\alpha}}{\sum _{j=1}^C p_j^\alpha}
 
 
 
-We conclude from the analysis that the stationary threshold is a monotonic
-non-decreasing function with respect to $\alpha$. Also the derivative of PGT function
-with respect to the true probabilities is non-negative which in turn means that the
-transformation is an order-preserving map. All values greater than the threshold move
-towards the threshold after transformation and all values below the threshold also move
-towards the threshold, and the threshold itself moves monotonically towards $1/C$ as
-$\alpha$ is decreased from $1$ to $0$. This concludes that the transformation smooths
-the original distribution.
-
-
-
-
-
-
+We provide the proofs in the supplementary section and conclude that the stationary
+threshold is a monotonic non-decreasing function with respect to $\alpha$. Also the
+derivative of PGT function with respect to the true probabilities is non-negative which
+in turn means that the transformation is an order-preserving map. All values greater
+than the threshold move towards the threshold after transformation and all values below
+the threshold also move towards the threshold, and the threshold itself moves
+monotonically towards $1/C$ as $\alpha$ is decreased from $1$ to $0$. This concludes
+that the transformation smooths the original distribution.
 
 \subsection{Effects of PGT on logit, weight gradients and class separation}
+\label{sec:pgt_effects}
 
 PGT, other than having the properties mentioned above, also:
 \begin{enumerate}
@@ -525,13 +357,6 @@ We demonstrate each of these effects in detail in supplementary sections
 \section{Experiments}
 \label{sec:Expe}
 
-
-
-
-
-
-\subsection{Experiments on convolutional neural networks (with batch-normalization)}
-\label{sec:bn}
 
 
 
@@ -552,30 +377,44 @@ We demonstrate each of these effects in detail in supplementary sections
 \includegraphics[width=0.98\textwidth]{acc_vs_epoch_r50_60epochs}
 \caption{Plot of test accuracies (ResNet-50)}
 \end{subfigure}
-\caption{ Log-linear plots of training and test accuracies and comparison with baseline
-of batch-normalized variants: \textbf{(a)} ResNet-18 ($\alpha=0.25$), \textbf{(b)}
-ResNet-50 ($\alpha=0.3$). For better visualization of accuracies obtained in the final
-iterations, we plot both axes in log scale. PowerGrad Transform improves upon the
-baseline in all cases. The corresponding accuracies are mentioned in Table
-\ref{tab:imagenet_table}. \textbf{(c)} Training speed comparison between PGT ($60$
+\caption{ Log-log plots of training and test accuracies and comparison with baseline of
+batch-normalized variants: \textbf{(a)} ResNet-18 ($\alpha=0.25$), \textbf{(b)}
+ResNet-50 ($\alpha=0.3$). \textbf{(c)} Training speed comparison between PGT ($60$
 epochs) and baseline ($100$ epochs). They both converge to the same test accuracy
 ($76.5\%$) on ImageNet-1K. PGT's accelerated training saves $40\%$ of the epoch budget.
 }
 \label{fig:metrics}
+\vspace{-0.5cm}
 \end{figure}
+
+
+
+
+We perform experiments on different variants ResNets using the ImageNet-1K dataset
+\cite{deng2009imagenet}. All models are trained on four V100 GPUs with a batch size of
+$1024$. We utilize a common set of hyperparameters for all experiments, which are as
+follows: 100 epoch budget, 5 epochs linear warmup phase beginning with a learning rate
+of $4\times 10^{-4}$ and ending with a peak learning rate of $0.4$, a momentum of $0.9$
+and weight decay of $5\times 10^{-4}$, the SGD Nesterov optimizer and mixed precision.
+In our studies, we employ either a step scheduler (dividing the learning rate by $10$ at
+the $30^{th}$, $60^{th}$, and $90^{th}$ epochs) or a cosine decay scheduler
+\cite{loshchilov2016sgdr}. We find $\alpha=0.25$ and $\alpha=0.05$ to be good choices
+for ResNet-18 and ResNet-50, though larger values such as $\alpha=0.3$ also have good
+performance as well. The experimental results are shown in Table
+\ref{tab:imagenet_table}, and we mention the value of the PGT hyperparmeter ($\alpha$)
+in each experiment. We explore different values of $\alpha$ in section \ref{sec:Abla}
+and provide detailed grid plots in the supplementary section\footnote{Reproducible code,
+training recipes for the experiments, pretrained checkpoints and training logs are
+provided at: \url{ https://github.com/skalien/power-grad-transform }.}.
 
 
 
 
 \begin{table}[!t]
 \centering
-\caption{ Results and comparison table for CNN networks trained on ImageNet-1K (sorted
-in descending order w.r.t. the last column denoting test accuracy improvements over
-baseline). Best training and test accuracies are highlighted in red and blue
-respectively. Accuracy differences are highlighted in yellow. In all experiments, we
-observe that PGT positively improves both training and test accuracies. We also observe
-that deeper networks such as SE-ResNet-50 and ResNet-50 accrue higher gains over the
-baselines as compared to shallow networks like ResNet-18. }
+\caption{ Results and comparison table for networks trained on ImageNet-1K. Best
+training and test accuracies are highlighted in red and blue respectively. Accuracy
+differences are highlighted in yellow. }
 \label{tab:imagenet_table}
 \begin{tabular}{cccccccc}
 \multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Scheduler}} &
@@ -626,26 +465,8 @@ baselines as compared to shallow networks like ResNet-18. }
 & & PGT & 0.25 & \textcolor{red}{\textbf{70.53}} & & \textcolor{blue}{\textbf{70.298}} &
 \\
 \end{tabular}
+\vspace{-0.5cm}
 \end{table}
-
-
-
-
-We perform experiments on different variants ResNets using the ImageNet-1K dataset
-\cite{deng2009imagenet}. All models are trained on four V100 GPUs with a batch size of
-$1024$. We utilize a common set of hyperparameters for all experiments, which are as
-follows: 100 epoch budget, 5 epochs linear warmup phase beginning with a learning rate
-of $4\times 10^{-4}$ and ending with a peak learning rate of $0.4$, a momentum of $0.9$
-and weight decay of $5\times 10^{-4}$, the SGD Nesterov optimizer and mixed precision.
-In our studies, we employ either a step scheduler (dividing the learning rate by $10$ at
-the $30^{th}$, $60^{th}$, and $90^{th}$ epochs) or a cosine decay scheduler
-\cite{loshchilov2016sgdr}. We find $\alpha=0.25$ and $\alpha=0.05$ to be good choices
-for ResNet-18 and ResNet-50, though larger values such as $\alpha=0.3$ also have good
-performance as well. The experimental results are shown in Table
-\ref{tab:imagenet_table}, and we mention the value of the PGT hyperparmeter ($\alpha$)
-in each experiment. We explore different values of $\alpha$ in section \ref{sec:Abla}
-and provide detailed grid plots in the supplementary section.
-
 
 
 
@@ -660,39 +481,12 @@ improvement over the step scheduler baseline for ResNet-50 is $0.57\%$ (training
 $0.524\%$ (testing). ResNet-101 sees a higher improvement in training fit, $0.81\%$ to
 be exact, while the improvement over the test set is $0.362\%$. Smaller networks such as
 SE-ResNet-18 and ResNet-18 sees accuracy boosts which are smaller but nevertheless
-positive. Therefore we conclude that with PGT, the consistent improvements in training
-accuracies across all cases is because the networks train better and arrive at better
-optimas during convergence. Per epoch training and test accuracy plots of ResNet-18 and
-ResNet-50 (both with and without PGT) are shown in Fig. \ref{fig:metrics}(a, b). For
-better visualization of the top end of the plots, we scale both axes in log scale.
-Because both training and test accuracies improve, it indicates that PowerGrad Transform
-allows the network to learn better representations\footnote{Reproducible code, training
-recipes for the experiments, pretrained checkpoints and training logs are provided at:
-\url{ https://github.com/skalien/power-grad-transform }. Code is adapted from
-\cite{rw2019timm}.}.
-
-
-These improvements are obtained with the number of epochs being kept the same as that of
-the baseline model. Alternatively, practitioners can apply PGT and have the networks
-converge to accuracy levels comparable to the baseline with a significantly reduced
-epoch budget. In Fig. \ref{fig:metrics}(c), we illustrate one such instance in which we
-train a ResNet-50 to its cosine scheduler baseline in just $60$ epochs with PGT, and
-match its baseline performance that is acquired in $100$ epochs. This hints to the
-observation that PGT not only makes the network perform better but also speeds up
-training. Because of the acceleration in training that is made possible by PGT, the
-total amount of training time can be decreased by $40\%$.
-
-
-
-
-
-
-
-
-
-
-
-
+positive. With consistent improvements in training accuracies across all cases, we
+conclude PGT helps networks learn better representations and arrive at better optimas
+during convergence. Per epoch training and test accuracy plots of ResNet-18 and
+ResNet-50 (both with and without PGT) are shown in Fig. \ref{fig:metrics}(a, b).
+Practioners can also choose to accelerate training and save as much as $40\%$ of the
+epoch budget [Fig. \ref{fig:metrics}(c)].
 
 \subsection{Empirical studies on networks without Batch Normalization}
 \label{sec:Empi}
@@ -700,100 +494,112 @@ total amount of training time can be decreased by $40\%$.
 
 
 
-We examine issues that occur in non-BatchNormalized networks and we provide insight into
-the effects of PGT on such networks. We use ResNet-18 \cite{he2016deep} as the
-foundation model trained on ImageNet-1K \cite{russakovsky2015imagenet}. We found deeper
-networks (such as ResNet-34 and ResNet-50 models) are impossible to train without Batch
-Normalization because of increased depth. So in order to conduct our empirical
-experiments, we solely focus on the ResNet-18 architecture. We designate different
-layers with their corresponding layer indices. We provide a detailed layer-wise index
-list of ResNet-18 in supplementary section \ref{sec:pgt_class_separation}.
+We examine issues that occur in non-normalized networks (networks without BN layers). We
+use ResNet-18 \cite{he2016deep} as the foundation model trained on ImageNet-1K
+\cite{russakovsky2015imagenet}. Deeper networks such as ResNet-34 and ResNet-50 are
+impossible to train without Batch Normalization courtesy of the increased depth and so
+we solely focus on ResNet-18. We designate different layers with their corresponding
+layer indices. Throughout the training process, we monitor variations in the the
+per-filter L2-norm of each layer's weights (layer indices are mentioned in section
+\ref{sec:r18_layers}). In Fig. \ref{fig:norm_plots}(a), some filters of layer $11$
+achieve a norm of zero during training. We refer to this event as `Zeroing Out', and it
+occurs when one of the channels (or filters) of a weight tensor gets fully filled with
+zeros and such filters do not contribute at all to determine the input-output
+relationship of a dataset, as the feature tensor it produces is also an all-zero tensor.
+According to our findings, when a filter once zeroed out does not recover with further
+training. 
 
-Throughout the training process, we monitor variations in the the per-filter L2-norm of
-each layer's weight tensor. Because a full plot of each layer's data would use an
-inordinate amount of space, we focus on a few critical layers' plots. The supplementary
-sections (\ref{sec:plots1} through \ref{sec:plots4}) contains full plots for all layer
-for various settings. The norm of the weights of the $11^\textit{th}$ convolutional
-layer is shown in Fig. \ref{fig:norm_plots}(a). Layer $11$ includes $256$ filters. Each
-colour on the figure represents the iteration-wise evolution of a particular filter
-throughout the course of training. The critical point to note is that some filters
-achieve a norm of zero during training. We refer to this event as `Zeroing Out', and
-occurs when a channel of a weight tensor gets fully filled with zeros. If all the
-coefficients of the filter becomes zero, only then the L2 norm of that filter becomes
-zero. If we observe zero filter norm for a filter, then that filter does not contribute
-at all to determine the input-output relationship of a dataset, as the feature tensor it
-produces is also an all-zero tensor. According to our findings, when a filter tensor
-becomes zeroed out, it does not recover with further training. We observe both effects
-\textbf{1)} zeroed out filter \textbf{2)} zeroed out feature.
 
 
 \begin{figure}[t]
 \centering
+\captionsetup{font=footnotesize}
+
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/baseline-w-layer-4-2}
+\caption{Layer 11\\ \textbf{(baseline)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/pgt-w-layer-4-2}
+\caption{Layer 11\\ \textbf{(PGT)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/baseline-w-layer-7-2}
+\caption{Final layer\\ \textbf{(baseline)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/pgt-w-layer-7-2}
+\caption{Final layer\\ \textbf{(PGT)}
+}\end{subfigure}
 \captionsetup{font=scriptsize}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/baseline-f-layer-22-1}
+\caption{Norm of final layer's features\\ \textbf{(baseline)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/pgt-f-layer-22-1}
+\caption{Norm of final layer's features\\ \textbf{(PGT)}
+}\end{subfigure}
 
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{baseline-w-layer-4-2}
-\caption{Norm of filters of convolutional layer 11 (without PGT)}
-\end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{baseline-w-layer-7-2}
-\caption{Norm of filters of the final convolutional layer (without PGT)}
-\end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{baseline-f-layer-22-1}
-\caption{Norm of final layer's output features (without PGT)}
-\end{subfigure}
+\vspace{6pt}
 
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{pgt-w-layer-4-2}
-\caption{Norm of filters of convolutional layer 11 (with PGT)}
+\captionsetup{font=footnotesize}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/baseline-w-layer-5-3}
+\caption{Layer 15\\ \textbf{(baseline)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/pgt-w-layer-5-3}
+\caption{Layer 15\\ \textbf{(PGT)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/agc_pgt-w-layer-5-3}
+\caption{Layer 15\\ \textbf{(AGC+PGT)}}
 \end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{pgt-w-layer-7-2}
-\caption{Norm of filters of the final convolutional layer (with PGT)}
-\end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{pgt-f-layer-22-1}
-\caption{Norm of final layer's output features (with PGT)}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/baseline-w-layer-1-2}
+\caption{Layer 2\\ \textbf{(baseline)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/pgt-w-layer-1-2}
+\caption{Layer 2\\ \textbf{(PGT)}
+}\end{subfigure}
+\begin{subfigure}[t]{0.16\textwidth}
+\includegraphics[width=\textwidth]{trimmed/agc_pgt-w-layer-1-2}
+\caption{Layer 2\\ \textbf{(AGC+PGT)}}
 \end{subfigure}
 \captionsetup{font=normalsize}
-\caption{ Experiment demonstrating the Zeroing Out phenomena, as observed in different
-filters and feature vectors. PGT greatly reduces the zeroing out of filters and promote
-better learning. }
+\caption{ Norm vs iter. plots demonstrating layer characteristics (the zero out
+phenomena) and the efficacy of PGT and AGC+PGT over baseline. Each colour represents a
+different filter or feature vector of a particular layer of a non-BN variant of
+ResNet-18. }
 \label{fig:norm_plots}
+\vspace{-0.5cm}
 \end{figure}
 
 
 
 
 
-Similar to the plot \ref{fig:norm_plots}(a), we see the plot of the final convolutional
-layer in Fig. \ref{fig:norm_plots}(b), where we observe a number of filters / units
-completely dropping out towards the end of training leading to underutilization of the
-network's parameters. In Fig. \ref{fig:norm_plots}(c), we see the norm of the feature
-vector at the output side of the global average pooling layer of ResNet-18. The feature
-vector here directly interfaces with the fully connected layer immediately after. Any
-zeroed out regions in this tensor directly leads to permanent information loss, as it
-does not contribute to the learning of decision boundaries in the upcoming fully
-connected layer, and indeed there exists a few zeroed out features in the baseline
-model, which we discuss next. The impact of having a zeroed out filter or a feature
-might have a variety of consequences for training and optimization. If a zeroed out
-filter is present in a convolutional layer, there are two possible outcomes. If the
-layer is immediately followed by a fully connected regression layer, there is an abrupt
-loss of information. For the reason that a zeroed out filter always generates zeroed out
-features regardless of the input image, when this tensor is fed to a fully connected
-layer, it does not communicate any information that is useful for classification. In the
-event that the zeroed out filter has a skip connection linked across it, this may be
-circumvented as long as there are no overlapping zeroed out channels in the two feature
-maps. On the other hand, if a feature tensor has a zeroed out channel at the input of a
-layer, the layer creates a zeroed out feature channel at the output, regardless of the
-weights. However, if there is a zeroed out channel in the feature map just before the
-fully connected layer, then this results in a permanent loss of information as it does
-not contribute to the learning of decision boundaries. ResNet-18 suffers from the same
-kind of information loss, as the final feature tensor (which is generated after the
-global average pooling layer) has multiple channels that are zeroed out [Fig.
-\ref{fig:norm_plots}(c)]. This information collapse phenomenon occurs when a channel
-that has been zeroed out stays zeroed out for all images in the dataset.
+
+
+
+Fig. \ref{fig:norm_plots}(c) and \ref{fig:norm_plots}(e) are the plot of the final conv
+layer's filters and the final global average pooling layer respectively. We observe a
+number of filters completely zeroing out. The feature vector here directly interfaces
+with the fully connected layer immediately after. Therefore any zeroed out features
+leads to permanent information loss, as it does not contribute to the learning of
+decision boundaries in the fully connected layer. Also, zeroed out weights tensors lead
+to zeroed out gradients hence stopping training for all subsequent iterations leading to
+a collapse in training for the affected layers. With large batch sizes, it is possible
+that an entire layer zeroes out [Fig. \ref{fig:high_bs}]. Gradient modification methods
+such as PGT or AGC can alleviate the zeroing out phenomena. We observe that the number
+of zeroed out filters has considerably reduced [Fig. \ref{fig:norm_plots}(b, d)]. The
+final feature tensor [Fig. \ref{fig:norm_plots}(f)] with PGT enabled, does not contain
+any zeroed out regions indicating that information loss is mitigated as the features
+pass on from the feature extracting layers to the fully connected layer. When PGT and
+AGC are combined, we get the most benefit for layer $15$ [Fig \ref{fig:norm_plots}(g-i)]
+and layer $2$ [Fig \ref{fig:norm_plots}(j-l)].
 
 
 
@@ -801,127 +607,43 @@ that has been zeroed out stays zeroed out for all images in the dataset.
 
 
 
+In Table \ref{tab:wobn_table} we find the baseline performance for high batch sizes
+($1024$) is drastically inferior to baselines for other batch sizes. PGT helps regain
+some of the lost performance by $0.682\%$ ($65.498\%$ vs. $64.816\%$). At a batch size
+of 512, invoking PGT improves the training accuracy baseline by $1.48\%$ and the test
+accuracy baseline by $0.684\%$, while at a batch size of 256, the improvement in
+training and test accuracies are $1.11\%$ and $1.018\%$ respectively. In comparison, the
+test accuracy improvements obtained by GC and AGC at batch size of 256
+is much less at $0.27\%$ and $0.5\%$, respectively. On the training accuracy front,
+since we get a significant boost ($1.48\%$ at batch size of 512 and $1.11\%$ at batch
+size of 256), it leads us to infer that when PowerGrad Transform is used, the network
 
-\begin{figure}[t]
+
+\begin{wrapfigure}{l}{0.4\textwidth}
+\vspace{-1cm}
 \centering
-\includegraphics[width=0.45\columnwidth]{baseline_high_bs-w-layer2-2}
-\caption{ Per filter norm vs. iteration plot of layer 5 of an unnormalized ResNet-18,
-trained with a very high batch size of 1024. The weight matrix of the entire layer
-zeroes out during training. }
+\includegraphics[width=0.45\textwidth]{baseline_high_bs-w-layer2-2}
+\caption{}
 \label{fig:high_bs}
-\end{figure}
+\vspace{-2cm}
+\end{wrapfigure}
 
+\noindent
+fits the training dataset more tightly and the convergence optima is significantly
+superior. Combining GC with PGT is not very significant. When AGC and PGT are combined,
+we see a tremendous increase in test accuracy of over $2.06\%$ over the baseline.
+Additionally, we provide comprehensive graphs of the norm profiles of the AGC + PGT
+method for all layers in the supplementary section \ref{sec:plots1}\ -\
+\ref{sec:plots4}.
 
-
-
-
-The impact of a feature tensor or weight tensor being zeroed out is seen to be
-particularly common in training procedures involving larger batch sizes in networks
-without normalization layers. As a result, the network's parameters are underutilized
-since some of the filters are not involved in extracting any useful information that is
-important for performing classification. When working with large batch sizes, it is
-possible that an entire layer zeroes out [Fig. \ref{fig:high_bs}]. In a network without
-skip connections, this can cause a full collapse in training. For example, if a weight
-tensor completely zeroes out, and it always produces a zero feature tensor, then the
-input feature tensor to the next convolutional layer is a zero tensor and thus the
-output of the next layer is always a zero tensor irrespective of its weights, and this
-continues until the end of the neural network pipeline leading to zero logits. Also,
-zeroed out weights tensors lead to zeroed out gradients hence stopping training for all
-subsequent iterations leading to a collapse in training. Although residual networks
-bypass this difficulty via the use of the skip connection, it does not solve the layer's
-non-participation in the overall objective of classification. It is possible to solve
-this issue by using methods such as gradient clipping (GC), adaptive gradient clipping
-(AGC), and PowerGrad Transform (PGT), all of which regulate the amount of gradient that
-flows at various junctions of the network. GC and AGC modify the gradients at each and
-every filter of every layer. PGT performs this operation at only one junction, which is
-at the softmax layer.
-
-
-
-
-
-
-
-
-
-\begin{figure}[t]
-\centering
-\captionsetup{font=scriptsize}
-
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{baseline-w-layer-5-3}
-\caption{Norm of filters of layer 15 (without AGC/PGT)}
-\end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{pgt-w-layer-5-3}
-\caption{Norm of filters of layer 15 (with PGT)}
-\end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{agc_pgt-w-layer-5-3}
-\caption{Norm of filters of layer 15 (with AGC+PGT)}
-\end{subfigure}
-
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{baseline-w-layer-1-2}
-\caption{Norm of filters of layer 2 (without AGC/PGT)}
-\end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{pgt-w-layer-1-2}
-\caption{Norm of filters of layer 2 (with PGT)}
-\end{subfigure}
-\begin{subfigure}[t]{0.32\textwidth}
-\includegraphics[width=\textwidth]{agc_pgt-w-layer-1-2}
-\caption{Norm of filters of layer 2 (with AGC+PGT)}
-\end{subfigure}
-\captionsetup{font=normalsize}
-\caption{ Experiment demonstrating the efficacy of PGT and AGC+PGT, as observed in
-different layers. }
-\label{fig:agc_pgt}
-\end{figure}
-
-
-
-
-
-In a similar fashion to the study in section \ref{sec:Empi}, we examine the norm
-profiles of features and weights in the PGT and AGC. The supplementary section includes
-all the detailed graphs of all layer. In Fig. \ref{fig:norm_plots}(d), we show the
-per-filter norm plot of the $11^\textit{th}$ convolutional layer as it progresses
-through a PGT enabled training session. We observe that the number of zeroed out filters
-has considerably reduced. We observe similar benefits in plot of Fig.
-\ref{fig:norm_plots}(e), which is the plot of the per-filter norm of the final
-convolutional layer. Coming to benefits in feature norms, we observe in plot of Fig.
-\ref{fig:norm_plots}(f), the final feature tensor obtained with PGT enabled training do
-not contain any zeroed out regions, leading us to assert that information loss is
-heavily mitigated as the features pass on from the feature extracting convolutional
-layers to the fully connected stage for regression.
-
-AGC is excellent at eliminating the issue of filter and feature zeroing out. However,
-AGC recovers a lower performance benefit than PGT. In the instance of PGT, we see that
-it also mitigates the zeroing out phenomenon in most layers. In Fig.
-\ref{fig:agc_pgt}(a), we see a plot of the $15^\textit{th}$ layer of the non-BN
-ResNet-18 trained without PGT. As we can see that there has been quite a few filter
-dropouts in the baseline. PGT recovers most of the filters [Fig. \ref{fig:agc_pgt}(b)].
-In some layers however, the performance of PGT is slightly weaker than the baseline. The
-$2^\textit{nd}$ convolutional layer has more zeroed out filters in PGT [Fig.
-\ref{fig:agc_pgt}(e)] than in the baseline [Fig. \ref{fig:agc_pgt}(d)]. Despite that,
-PGT achieves a higher overall accuracy (Table \ref{tab:wobn_table}). This necessitates
-the simultaneous use of AGC and PGT, for the non-BN ResNet-18.
 
 
 
 \begin{table}[!t]
 \centering
-\caption{ Results for non-normalized ResNets on ImageNet-1K. Each experiment is
-conducted with a 100 epoch budget using the cosine decay scheduler. Best training and
-test accuracies are highlighted in red and blue respectively. Top differences in
-training and test accuracies are marked in yellow. The baselines in each segment is
-taken as the reference point for all `Diff' accuracies in that segment. The first three
-segments highlight comparison for experiments where the methods are applied
-individually, while the last segment denotes performance metrics for combinations of
-different methods (GC + PGT, AGC + PGT). We see that at any batch size, with PGT, the
-performance of non-normalized version of ResNet-18 improves significantly over the
-baseline owing to the improvements in training as observed in Fig. \ref{fig:agc_pgt}. }
+\caption{ Results for non-normalized ResNets on ImageNet-1K. Best training and test
+accuracies are highlighted in red and blue respectively. Top differences in training and
+test accuracies are marked in yellow. }
 \label{tab:wobn_table}
 \begin{tabular}{cccccccc}
 \multirow{2}{*}{\textbf{Model}} & \multirow{2}{*}{\textbf{Batch Size}} &
@@ -951,52 +673,8 @@ ResNet-18 & 1024 & Baseline & - & 66.27 & - & 64.816 & - \\
 \textcolor{olive}{\textbf{+2.06}} & \textcolor{blue}{\textbf{68.856}} &
 \textcolor{olive}{\textbf{+2.06}} \\
 \end{tabular}
+\vspace{-0.5cm}
 \end{table}
-
-
-
-
-
-
-
-
-
-We provide performance metrics on the test set of ImageNet-1K for different batch sizes
-for the non-BN ResNet-18 and also experiment with different methods (GC, AGC, PGT along
-with their combinations). Table \ref{tab:wobn_table} shows the findings. To begin, we
-use a batch size of 1024. The baseline performance for this batch size is drastically
-inferior to baselines for other batch sizes. PGT helps regain some of the lost
-performance by $0.682\%$ ($65.498\%$ vs. $64.816\%$). This illustrates that in
-unnormalized networks, accuracy suffers significantly when batch sizes are large.
-Additionally, the training process is often unstable at this batch size, resulting in
-filters and sometimes entire layers frequently zeroing out (as seen in section
-\ref{sec:Empi}). At a batch size of 512, invoking PGT improves the training accuracy
-baseline by $1.48\%$ and the test accuracy baseline by $0.684\%$, while at a batch size
-of 256, the improvement in training and test accuracies are $1.11\%$ and $1.018\%$
-respectively. In comparison, the test accuracy improvements obtained by GC and AGC at
-batch size of 256 is much less, at $0.27\%$ and $0.5\%$, respectively.
-
-On the training accuracy front, since we get a significant boost ($1.48\%$ at batch size
-of 512 and $1.11\%$ at batch size of 256), it leads us to infer that when PowerGrad
-Transform is used, the network fits the training dataset more tightly and the
-convergence optima is significantly superior. We also notice that the training versus
-testing gap increases with PGT as compared to the gap at baseline even though both
-training and test accuracies improve. Therefore it allows us to conclude that the
-improvements in training and test accuracies are obtained not through regularization
-like it does in methods such as label smoothing; rather the improvements are obtained as
-PGT enables the network to utilize its learning capacity better and arrive at a higher
-performing optima at convergence, something which is inaccessible through traditional
-gradient based training.
-
-We also experiment with combinations of GC/AGC and PGT. The advantage of combining GC
-with PGT is not very significant. When AGC and PGT are combined, we see a tremendous
-increase in test accuracy of over $2.06\%$ over the baseline. As seen in Fig.
-\ref{fig:agc_pgt}(c) and \ref{fig:agc_pgt}(f), activating AGC and PGT concurrently
-results in no filter dropouts in all layers while also improving the accuracy by a
-significant margin. Additionally, we provide comprehensive graphs of the norm profiles
-of the AGC + PGT method for all layers in the supplementary section.
-
-
 
 
 
@@ -1007,7 +685,7 @@ of the AGC + PGT method for all layers in the supplementary section.
 
 
 
-\begin{figure}[t]
+\begin{figure}[!bp]
 \centering
 \begin{subfigure}{0.33\textwidth}
 \centering
@@ -1038,26 +716,20 @@ $(0.01074 x + 0.25816)$. }
 
 
 As seen in Fig. \ref{fig:stats}(a), the logit norm increases as $\alpha$ falls from $1$
-to $0$. In the initial training phase, PGT causes the gradient in both the valid and
-wrong classes to rise as the network misclassifies majority of the examples. Due to the
-exponential nature of the softmax function, the predicted probability distribution may
-frequently be close to a delta distribution, even in instances of misclassifications.
-PGT reshapes the predicted probability distribution. It redistributes probability from
-the confident classes to the less confident ones. Gradient rises in all classes. We also
-see that the final value of the loss rises as $\alpha$ drops, and that the logit norm
-and the final value of the loss are linearly correlated Fig. \ref{fig:stats}(c). What is
-surprising is that: \textit{it is possible to achieve higher accuracies even though the
-loss values are larger during convergence}. In our studies with ResNet-50, for instance,
-if PGT is not invoked, the corresponding test accuracy is $76.56\%$ (Table
-\ref{tab:imagenet_table}) with a cross-entropy loss value of $0.852$. However, if PGT is
-activated with $\alpha=0.05$, the corresponding test accuracy is $77.216\%$ (Table
-\ref{tab:imagenet_table}) with a loss value of $2.360$. This is markedly different from
-the coupled gradient descent based training procedures. PGT enables the network to
-arrive at such optima where the loss values are high, but both training and test
-perfomance is better. From these plots of logits and losses we find that with the
-inclusion of PGT in the training process, the model can have access to such regions of
-the loss landscape that is otherwise inaccessible to traditional gradient based training
-procedures.
+to $0$. We also see that the final value of the loss rises as $\alpha$ drops, and that
+the logit norm and the final value of the loss are linearly correlated Fig.
+\ref{fig:stats}(c). What is surprising is that: \textit{it is possible to achieve higher
+accuracies even though the loss values are larger during convergence}. In our studies
+with ResNet-50, for instance, if PGT is not invoked, the corresponding test accuracy is
+$76.56\%$ [Table \ref{tab:imagenet_table}] with a cross-entropy loss value of $0.852$.
+However, if PGT is activated with $\alpha=0.05$, the corresponding test accuracy is
+$77.216\%$ [Table \ref{tab:imagenet_table}] with a loss value of $2.360$. This is
+markedly different from the coupled gradient descent based training procedures. PGT
+enables the network to arrive at such optima where the loss values are high, but both
+training and test perfomance is better. From these plots of logits and losses we find
+that with the inclusion of PGT in the training process, the model can have access to
+such regions of the loss landscape that is otherwise inaccessible to traditional
+gradient based training procedures.
 
 \section{Ablation Study}
 \label{sec:Abla}
@@ -1086,60 +758,49 @@ procedures.
 7. & ResNet-50 & Cosine & \xmark & 0.05 & 79.68 & 77.216 & 2.464 \\
 8. & ResNet-50 & Cosine & 0.1 & 0.05 & 77.69 & 76.39 & 1.3 \\
 \end{tabular}
+\vspace{-0.5cm}
 \end{table}
 
 
 
 
-We conduct an ablation study to investigate the effects of PowerGrad Transform for
-different values of the hyperparameter ($\alpha$). Grid plots are made available in the
-supplementary section. We have previously demonstrated from the experiments depicted in
-section \ref{sec:Expe}, that PowerGrad Transform causes the network to arrive at a
-better optima and fit the training dataset better than the baseline. In this ablation
-study, we use the ResNet-50 architecture and we combine our proposed method with other
-regularization techniques such as label smoothing and report our findings in Table
-\ref{tab:ablation_table}. We also investigate the two optimal peaks of the
-hyperparameter ($\alpha$) obtained from ResNet-50's grid search ($\alpha=0.05$ and
-$\alpha=0.3$). First, we examine the effect of PGT on the step scheduler baseline in
-order to later compare it to the cosine scheduler baseline. \textbf{Row-1)} We begin
-with the step scheduler baseline ($75.97\%$). \textbf{Row-2)} PGT improves upon the step
-scheduler baseline (test set) by a substantial margin with $0.524\%$ ($76.494\%$ as
-opposed to $75.97\%$). \textbf{Row-3)} Introducing the cosine scheduler yields a
-$0.59\%$ improvement ($76.56\%$ vs. $75.97\%$) over the step scheduler. \textbf{Row-4)}
-After introducing label smoothing, the test accuracy relative to the cosine scheduler
-baseline increases by only $0.138\%$ (from $76.56\%$ to $76.698\%$). \textbf{Row-5)}
-However, introducing PGT with $\alpha=0.3$ alone (without label smoothing) improves the
-cosine scheduler baseline by $0.326\%$ ($76.886\%$ vs. $76.56\%$). \textbf{Row-6)}
-Combining PGT ($\alpha=0.3$) with label smoothing improves the performance on the test
-set further by $0.408\%$ (from $76.56\%$ to $76.968\%$) and reduces the generalization
-gap (from $2.54\%$ to $1.5\%$). However, the impact of combining PGT with label
-smoothing can vary depending on the value of the hyperparameter ($\alpha$).
-\textbf{Row-7)} With a PGT hyperparameter value of $\alpha=0.05$, we notice the greatest
-performance improvement, $1.246\%$ over the step scheduler test baseline and $0.656\%$
-over the cosine scheduler test baseline. \textbf{Row-8)} Adding label smoothing to PGT
-($\alpha=0.05$) hurts performance even though it reduces the generalization gap.
+We conduct ablation studies to investigate the effects of PowerGrad Transform for
+different values of the hyperparameter ($\alpha$), where we use the ResNet-50
+architecture and combine our proposed method with different schedulers, regularization
+techniques and different values of $\alpha$. We report our findings in Table
+\ref{tab:ablation_table}. First we examine the effect of PGT on the step scheduler
+baseline in order to later compare it to the cosine scheduler baseline. \textbf{Row-1)}
+We begin with the step scheduler baseline ($75.97\%$). \textbf{Row-2)} PGT improves upon
+the step scheduler baseline (test set) by a substantial margin with $0.524\%$
+($76.494\%$ as opposed to $75.97\%$). \textbf{Row-3)} Introducing the cosine scheduler
+yields a $0.59\%$ improvement ($76.56\%$ vs. $75.97\%$) over the step scheduler.
+\textbf{Row-4)} After introducing label smoothing, the test accuracy relative to the
+cosine scheduler baseline increases by only $0.138\%$ (from $76.56\%$ to $76.698\%$).
+\textbf{Row-5)} However, introducing PGT with $\alpha=0.3$ alone (without label
+smoothing) improves the cosine scheduler baseline by $0.326\%$ ($76.886\%$ vs.
+$76.56\%$). \textbf{Row-6)} Combining PGT ($\alpha=0.3$) with label smoothing improves
+the performance on the test set further by $0.408\%$ (from $76.56\%$ to $76.968\%$) and
+reduces the generalization gap (from $2.54\%$ to $1.5\%$). However, the impact of
+combining PGT with label smoothing can vary depending on the value of the hyperparameter
+($\alpha$). \textbf{Row-7)} With a PGT hyperparameter value of $\alpha=0.05$, we notice
+the greatest performance improvement, $1.246\%$ over the step scheduler test baseline
+and $0.656\%$ over the cosine scheduler test baseline. \textbf{Row-8)} Adding label
+smoothing to PGT ($\alpha=0.05$) hurts performance even though it reduces the
+generalization gap.
 
-\section{Discussions}
-\label{sec:Disc}
+\section{Conclusion}
+\label{sec:Conc}
 
 
-We introduced PowerGrad Transform, which decouples the backward and forward passes of
-neural network training and enables a significantly better fit to the dataset, as
-measured by training and test accuracy metrics. We show the application of PowerGrad
-Transform, a simple yet powerful technique for modifying the gradient flow behaviour. We
-investigate experimentally the degenerate behavior of non-BN networks, which is
-frequently observed during the standard training approach, especially with higher batch
-sizes. With PGT, gradient behavior is enhanced and the likelihood of weights attaining
-degenerate states is diminished. We provide a theoretical analysis of the PowerGrad
-transformation. With the use of different network topologies and datasets, we are able
-to show the potential of PGT and explore its impacts from an empirical standpoint. We
-provide comprehensive results on a number of models (non-BN and BN ResNets, SE-ResNets)
-using the ImageNet dataset. PGT helps the network to improve its learning capabilities
-by locating a more optimum convergence point and simultaneously speeds up training. In
-addition, we undertake an ablation research and compare its effects to those of
-regularization methods such label smoothing.
+PowerGrad Transform enables a significantly better fit to the dataset as measured by
+training and test accuracy metrics. With PGT, gradient behavior is enhanced and weights
+attain better values in normalized networks and degenerate states are avoided in non-BN
+networks. We provide theoretical analyses of the transformation. With different network
+topologies and datasets, we are able to show the potential of PGT and explore its
+impacts from an empirical standpoint. PGT helps the network to improve its learning
+capabilities by locating a more optimum convergence point and simultaneously speeds up
+training.
 
-% \end{document}
 
 \bibliographystyle{splncs04}
 \bibliography{references}
@@ -1428,7 +1089,7 @@ In PyTorch, the available method to modify gradients in the backward pass is usi
 \codeword{register_hook} function which is called in the \codeword{forward} function.
 
 \begin{figure}[ht] \hrule \lstinputlisting[language=Python]{code.py} \hrule
-\vspace{0.1cm} \caption{Python code of PowerGrad Transform based on PyTorch. }
+\vspace{0.25cm} \caption{Python code of PowerGrad Transform based on PyTorch. }
 \label{fig:code}
 \end{figure}
 
@@ -1532,7 +1193,7 @@ determined colour. } \end{figure}
 \label{sec:r18_layers}
 
 For the layer indices used in figures Fig. \ref{fig:norm_plots}, \ref{fig:high_bs},
-\ref{fig:agc_pgt}, we provide a block diagram depicting the different convolutional
+\ref{fig:norm_plots}, we provide a block diagram depicting the different convolutional
 layers of ResNet-18 with corresponding layer indices in Fig. \ref{fig:resnet18}. Each
 layer represents a convolutional layer, with the layer index and the number of filters
 denoted alongside it. Downsampling convolutional layers in skip connections are drawn
