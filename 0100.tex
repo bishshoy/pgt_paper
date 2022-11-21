@@ -17,6 +17,9 @@
 \usepackage{color}
 \graphicspath{{images/}}
 \raggedbottom
+\makeatletter
+\def\blfootnote{\xdef\@thefnmark{}\@footnotetext}
+\makeatother
 \newcommand{\forceindenta}{\parindent=1em\indent\parindent=0pt\relax}
 \newcommand{\forceindentb}{\parindent=1.65em\indent\parindent=0pt\relax}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
@@ -42,11 +45,12 @@ tabsize=2 }
 \lstset{style=mystyle}
 
 \begin{document}
-\title{Altering Backward Pass Gradients to improve Convergence}
-\author{Bishshoy Das\inst{1}\orcidID{0000-0002-6525-4015}\and Milton Mondal\inst{1}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Brejesh Lall\inst{3}\orcidID{xxxx-xxxx-xxxx-xxxx}\and Shiv Dutt Joshi\inst{3}\orcidID{0000-0002-0326-0524}\and Sumantra Dutta Roy\inst{3}\orcidID{0000-0002-2141-5067}}
+\title{Altering Backward Pass Gradients\\ to Improve Convergence}
+\author{Bishshoy Das\inst{\ast 1}\orcidID{0000-0002-6525-4015}\and Milton Mondal\inst{\ast 1}\orcidID{0000-0002-1832-0702}\and Brejesh Lall\inst{1}\orcidID{0000-0003-2677-3071}\and Shiv Dutt Joshi\inst{1}\orcidID{0000-0002-0326-0524}\and Sumantra Dutta Roy\inst{1}\orcidID{0000-0002-2141-5067}}
 \authorrunning{Das et al.}
 \institute{Indian Institute of Technology Delhi, New Delhi - 110016, India \\ \email{\{bishshoy.das, milton.mondal, brejesh, sdjoshi, sumantra\}@ee.iitd.ac.in}}
 \maketitle
+
 
 \begin{abstract}
 In standard neural network training, the gradients in the backward pass are determined
@@ -71,7 +75,7 @@ non-normalized ResNet-18 network on the ImageNet classification task.
 \label{sec:Intr}
 
 
-
+\blfootnote{$^\ast \text{Equal contribution.}$}
 
 
 Backpropagation is traditionally used for training deep neural networks
@@ -1148,30 +1152,36 @@ assist.
 
 \subsection{Norm plots of weights (baseline (low batch size)) of non-BN ResNet-18}
 \label{sec:plots1}
-\begin{figure}[ht] \centering \includegraphics[width=0.57\textwidth]{baseline-w_norm}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.57\textwidth]{compressed/baseline-w_norm}
 \caption{ Method: baseline, batch size = 256. This is a plot depicting the
 iteration-wise evolution of the norm of each filter in each layer. Each subplot
 corresponds to a layer of the unnormalized ResNet-18. Above each subplot, the layer
 indices are shown. Each filter in each subplot is shown with a separate and randomly
-determined colour. Readers are requested to zoom in. } \end{figure}
+determined colour. Readers are requested to zoom in. } 
+\end{figure}
 
 \clearpage
 
 \subsection{Norm plots of weights (baseline (high batch size)) of non-BN ResNet-18}
 \label{sec:plots2}
-\begin{figure}[ht] \centering
-\includegraphics[width=0.57\textwidth]{baseline_high_bs-w_norm} \caption{ Method:
-baseline (high batch size), batch size = 1024. This is a plot depicting the
-iteration-wise evolution of the norm of each filter in each layer. Each subplot
-corresponds to a layer of the unnormalized ResNet-18. Above each subplot, the layer
-indices are shown. Each filter in each subplot is shown with a separate and randomly
-determined colour. Readers are requested to zoom in. } \end{figure}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.57\textwidth]{compressed/baseline_high_bs-w_norm}
+\caption{ Method: baseline (high batch size), batch size = 1024. This is a plot
+depicting the iteration-wise evolution of the norm of each filter in each layer. Each
+subplot corresponds to a layer of the unnormalized ResNet-18. Above each subplot, the
+layer indices are shown. Each filter in each subplot is shown with a separate and
+randomly determined colour. Readers are requested to zoom in. } \end{figure}
 
 \clearpage
 
 \subsection{Norm plots of weights (PGT) of non-BN ResNet-18}
 \label{sec:plots3}
-\begin{figure}[ht] \centering \includegraphics[width=0.57\textwidth]{pgt-w_norm}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.57\textwidth]{compressed/pgt-w_norm}
 \caption{ Method: PGT, batch size = 256. This is a plot depicting the iteration-wise
 evolution of the norm of each filter in each layer. Each subplot corresponds to a layer
 of the unnormalized ResNet-18. Above each subplot, the layer indices are shown. Each
@@ -1183,13 +1193,16 @@ are requested to zoom in. }
 
 \subsection{Norm plots of weights (AGC + PGT) of non-BN ResNet-18}
 \label{sec:plots4}
-\begin{figure}[ht] \centering \includegraphics[width=0.57\textwidth]{agc_pgt-w_norm}
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.57\textwidth]{compressed/agc_pgt-w_norm}
 \caption{ Method: AGC + PGT, batch size = 256. This is a plot depicting the
 iteration-wise evolution of the norm of each filter in each layer. Each subplot
 corresponds to a layer of the unnormalized ResNet-18. Above each subplot, the layer
 indices are shown. Each filter in each subplot is shown with a separate and randomly
 determined colour.
-Readers are requested to zoom in. } \end{figure}
+Readers are requested to zoom in. }
+\end{figure}
 
 
 
@@ -1300,7 +1313,5 @@ layer of a non-BN variant of ResNet-18. }
 baseline. Each colour represents a different filter or feature vector of a particular
 layer of a non-BN variant of ResNet-18. }
 \end{figure}
-
-
 
 \end{document}
